@@ -94,8 +94,6 @@ const CheckoutPage = () => {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || "Failed to submit booking");
     }
-
-    const result = await response.json();
     
     // Store booking details in sessionStorage for confirmation page
     sessionStorage.setItem("bookingDetails", JSON.stringify(bookingDetails));
