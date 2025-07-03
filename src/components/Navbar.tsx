@@ -56,7 +56,6 @@ const Navbar = () => {
         >
           <Link href="/" className="flex items-center gap-2">
             <motion.div
-              whileHover={{ rotate: 5 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
               <Image 

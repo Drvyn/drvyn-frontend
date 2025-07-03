@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { BsChevronDown, BsArrowLeft, BsSearch } from "react-icons/bs";
 import SocialMedia from "@/components/SocialMedia";
 import Image from 'next/image';
-import { toast } from 'react-hot-toast';
 
 interface CarModel {
   name: string;
@@ -112,7 +111,7 @@ const Banner = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBrand || !selectedModel || !selectedFuel || !selectedYear || !phone) {
-      toast.error("Please fill all fields");
+      setError("Please fill all fields");
       return;
     }
   
@@ -150,18 +149,41 @@ const Banner = () => {
   };
   
 
-  if (isLoading) {
-    return (
-      <section className="relative flex items-center justify-center h-screen w-full bg-gradient-to-br from-gray-100 to-gray-200 font-sans">
-        <div className="absolute inset-0 z-0 blur-sm opacity-30 bg-[url('/media/bg2.png')] bg-cover bg-center" />
-        <div className="relative z-10 w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl px-8 py-12 flex flex-col items-center text-center">
-          <div className="mb-6 animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid" />
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading car data</h2>
-          <p className="text-sm text-gray-500">Please wait while we fetch the latest information for you.</p>
+if (isLoading) {
+  return (
+    <section className="relative flex items-center justify-center h-screen w-full bg-gradient-to-br from-gray-100 to-gray-200 font-sans">
+      <div className="absolute inset-0 z-0 blur-sm opacity-30 bg-[url('/media/bg2.png')] bg-cover bg-center" />
+      <div className="relative z-10 w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl px-8 py-12 flex flex-col items-center text-center">
+        {/* Round video container */}
+        <div className="mb-6 rounded-full h-28 w-28 overflow-hidden ">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="h-full w-full object-cover"
+            onPlay={(e: React.SyntheticEvent<HTMLVideoElement>) => {
+              const video = e.currentTarget;
+              video.playbackRate = 2.0;
+            }}
+            onLoadedMetadata={(e: React.SyntheticEvent<HTMLVideoElement>) => {
+              const video = e.currentTarget;
+              video.playbackRate = 2.0;
+              video.play().catch((error) => {
+                console.error("Autoplay prevented:", error);
+              });
+            }}
+          >
+            <source src="/animation.mp4" type="video/mp4" />
+            Your browser does not support HTML5 video.
+          </video>
         </div>
-      </section>
-    );
-  }
+        <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading car data</h2>
+        <p className="text-sm text-gray-500">Please wait while we fetch the latest information for you.</p>
+      </div>
+    </section>
+  );
+}
 
   const renderImage = (url: string, alt: string, className = "") => (
     <div className={`w-16 h-16 flex items-center justify-center ${className}`}>
@@ -182,7 +204,7 @@ const Banner = () => {
     <section className="relative flex flex-col lg:flex-row min-h-[400px] lg:min-h-screen w-full overflow-hidden font-sans">
       <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: "url('/media/bg2.png')" }} />
 
-      <div className="relative z-20 w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
+      <div className="relative top-0 lg:-top-7 z-20 w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="w-full max-w-md sm:max-w-lg bg-white shadow-xl p-6 sm:p-8 md:p-10 rounded-xl">
           {error && (
             <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
@@ -224,12 +246,8 @@ const Banner = () => {
                 type="tel"
                 maxLength={10}
                 value={phone}
-                onChange={(e) => {
-                  const onlyNums = e.target.value.replace(/[^0-9]/g, ''); 
-                  setPhone(onlyNums);
-                }}
+                onChange={(e) => setPhone(e.target.value)}
                 placeholder="ENTER MOBILE NUMBER"
-                pattern="\d*"
                 className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 required
               />

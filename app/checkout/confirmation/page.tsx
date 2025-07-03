@@ -112,7 +112,7 @@ const ConfirmationPage = () => {
         className="w-full max-w-6xl bg-white rounded-3xl shadow-xl overflow-hidden border border-white/20"
       >
         {/* Header section */}
-        <div className="relative h-48 bg-gradient-to-r from-blue-400 to-blue-500 overflow-hidden">
+        <div className="relative h-48 bg-gradient-to-r from-blue-500 to-blue-600 overflow-hidden">
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-500/20 rounded-full"></div>
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-500/20 rounded-full"></div>
           
