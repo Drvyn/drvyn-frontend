@@ -2,9 +2,9 @@ module.exports = {
   images: {
     domains: [
       'localhost',
-      'https://www.drvyn.in',      
-      'https://drvyn-frontend.vercel.app', 
-      'https://drvyn-backend.onrender.com'   
+      'www.drvyn.in',      
+      'drvyn-frontend.vercel.app', 
+      'drvyn-backend.onrender.com'   
     ],
   },
 }
