@@ -2,7 +2,7 @@ const SocialMedia = () => {
   return (
     <div className="fixed bottom-10 right-6 flex flex-col space-y-4 z-20">
     <a
-      href="https://wa.link/e81dnb"
+      href="https://wa.me/9840277116?text=Hi,%20I%E2%80%99d%20like%20to%20book%20a%20car%20repair%20service.%20Please%20let%20me%20know%20the%20available%20times.%20Thanks!"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-5 right-5 z-50 group"
