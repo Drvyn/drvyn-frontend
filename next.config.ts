@@ -3,8 +3,8 @@ module.exports = {
     domains: [
       'localhost',
       'https://www.drvyn.in',      
-      'caragecarcare.vercel.app', 
-      'caragecarcare-backend.onrender.com'   
+      'https://drvyn-frontend.vercel.app', 
+      'https://drvyn-backend.onrender.com'   
     ],
   },
 }
