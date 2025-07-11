@@ -66,8 +66,9 @@ const Banner = () => {
         setBrands(brandsData);
         setFuelIcons(fuelsData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load data");
-      } finally {
+      console.error("Error fetching initial data:", err);
+      setError(err instanceof Error ? err.message : "Failed to load data");
+    } finally {
         setIsLoading(false);
       }
     };
