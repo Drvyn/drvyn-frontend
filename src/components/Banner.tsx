@@ -65,8 +65,10 @@ const Banner = () => {
 
         setBrands(brandsData);
         setFuelIcons(fuelsData);
-      } catch {
-        setError("Failed to load data");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to load data";
+        setError(message);
+        console.error("Fetch error:", error); 
       } finally {
         setIsLoading(false);
       }
@@ -139,9 +141,10 @@ const Banner = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setOtpSent(true);
       setOtpError("");
-    } catch (err) {
-      setOtpError("Failed to send OTP. Please try again.");
-    } finally {
+    } catch (error) {
+    console.error("OTP error:", error); 
+    setOtpError("Failed to send OTP. Please try again.");
+  } finally {
       setIsSendingOtp(false);
     }
   };
@@ -192,7 +195,7 @@ const Banner = () => {
       window.location.href = '/service';
   
     } catch (err) {
-      console.error("Submission error:", err);
+      console.error("Submission error:", err); 
       setError("Failed to submit. Please try again.");
     }
   };
