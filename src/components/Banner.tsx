@@ -455,7 +455,8 @@ const Banner = () => {
   custom={4}
 >
   <div className="flex gap-2 w-full">
-    <div className="w-[70%]">
+    {/* Mobile number input - 70% on mobile, grows on desktop */}
+    <div className="w-[70%] sm:flex-1">
       <input
         type="tel"
         maxLength={10}
@@ -469,18 +470,20 @@ const Banner = () => {
           }
         }}
         placeholder="ENTER MOBILE NUMBER"
-        className="w-full border border-gray-300 p-3 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm transition-colors duration-200"
+        className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm sm:text-base transition-colors duration-200"
         required
         disabled={otpVerified}
       />
     </div>
-    <div className="w-[30%]">
+    
+    {/* OTP button - 30% on mobile, auto width on desktop */}
+    <div className="w-[30%] sm:w-auto">
       {!otpVerified && (
         <button
           type="button"
           onClick={handleSendOtp}
           disabled={isSendingOtp || (otpSent && resendTimer > 0)}
-          className={`w-full text-white cursor-pointer font-semibold py-3 rounded-lg transition-all duration-200 text-sm ${
+          className={`w-full sm:w-[120px] text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg transition-all duration-200 text-sm sm:text-base ${
             isSendingOtp || (otpSent && resendTimer > 0)
               ? 'bg-blue-400'
               : 'bg-blue-600 hover:bg-blue-700'
