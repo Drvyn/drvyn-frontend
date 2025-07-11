@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BsChevronDown, BsArrowLeft, BsSearch } from "react-icons/bs";
 import SocialMedia from "@/components/SocialMedia";
 import Image from 'next/image';
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 interface CarModel {
   name: string;
@@ -23,6 +23,9 @@ interface FuelType {
   url: string;
 }
 
+type Direction = "forward" | "backward";
+type ViewType = "form" | "brands" | "models" | "fuels" | "years";
+
 const Banner = () => {
   const [brands, setBrands] = useState<CarBrand[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<CarBrand | null>(null);
@@ -32,7 +35,7 @@ const Banner = () => {
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<"form" | "brands" | "models" | "fuels" | "years">("form");
+  const [currentView, setCurrentView] = useState<ViewType>("form");
   const [brandSearch, setBrandSearch] = useState("");
   const [modelSearch, setModelSearch] = useState("");
   const [fuelIcons, setFuelIcons] = useState<FuelType[]>([]);
@@ -41,10 +44,75 @@ const Banner = () => {
   const [otpVerified, setOtpVerified] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otpError, setOtpError] = useState("");
-  const [transitionDirection, setTransitionDirection] = useState<"forward" | "backward">("forward");
+  const [transitionDirection, setTransitionDirection] = useState<Direction>("forward");
   const [viewHeight, setViewHeight] = useState("auto");
+  const [resendTimer, setResendTimer] = useState(0);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const years = Array.from({length: 30}, (_, i) => (new Date().getFullYear() - i).toString());
+
+  const viewVariants: Variants = {
+    enter: (direction: Direction) => ({
+      x: direction === "forward" ? "100%" : "-100%",
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "tween",
+        ease: "easeInOut",
+        duration: 0.3
+      }
+    },
+    exit: (direction: Direction) => ({
+      x: direction === "forward" ? "-30%" : "30%",
+      opacity: 0,
+      transition: {
+        type: "tween",
+        ease: "easeInOut",
+        duration: 0.2
+      }
+    })
+  };
+
+  const formItemVariants: Variants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.2,
+        ease: "easeOut"
+      }
+    })
+  };
+
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.2,
+        ease: "easeOut"
+      }
+    })
+  };
+
+  const checkmarkVariants: Variants = {
+    initial: { scale: 0 },
+    animate: { 
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 500,
+        damping: 20
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -84,6 +152,21 @@ const Banner = () => {
     }
   }, [currentView]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendTimer > 0) {
+      timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendTimer]);
+
+  // Automatically verify OTP when all 6 digits are entered
+  useEffect(() => {
+    if (otp.length === 6 && !otpVerified) {
+      handleVerifyOtp();
+    }
+  }, [otp]);
+
   const filteredBrands = brands.filter(brand =>
     brand.brand.toLowerCase().includes(brandSearch.toLowerCase())
   );
@@ -92,7 +175,7 @@ const Banner = () => {
     model.name.toLowerCase().includes(modelSearch.toLowerCase())
   );
 
-  const handleViewChange = (newView: typeof currentView, direction: "forward" | "backward") => {
+  const handleViewChange = (newView: ViewType, direction: Direction) => {
     setTransitionDirection(direction);
     setCurrentView(newView);
   };
@@ -140,21 +223,51 @@ const Banner = () => {
       setOtpError("");
       await new Promise(resolve => setTimeout(resolve, 1000));
       setOtpSent(true);
+      setOtp("");
+      setResendTimer(30);
       setOtpError("");
     } catch (error) {
-    console.error("OTP error:", error); 
-    setOtpError("Failed to send OTP. Please try again.");
-  } finally {
+      console.error("OTP error:", error); 
+      setOtpError("Failed to send OTP. Please try again.");
+    } finally {
       setIsSendingOtp(false);
     }
   };
 
-  const handleVerifyOtp = () => {
-    if (otp.length === 6) {
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = otp.split('');
+    newOtp[index] = value;
+    setOtp(newOtp.join(''));
+    
+    // Auto focus to next input
+    if (value && index < 5 && otpInputRefs.current[index + 1]) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0 && otpInputRefs.current[index - 1]) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp.length !== 6) return;
+
+    try {
+      setIsSendingOtp(true);
+      setOtpError("");
+      // Simulate verification
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setOtpVerified(true);
       setOtpError("");
-    } else {
-      setOtpError("Please enter a valid 6-digit OTP");
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      setOtpError("OTP verification failed. Please try again.");
+    } finally {
+      setIsSendingOtp(false);
     }
   };
 
@@ -200,13 +313,27 @@ const Banner = () => {
     }
   };
 
+  const renderImage = (url: string, alt: string, className = "") => (
+    <div className={`w-16 h-16 flex items-center justify-center ${className}`}>
+      <Image 
+        src={`${process.env.NEXT_PUBLIC_API_URL}${url}`}
+        alt={alt}
+        width={124}  
+        height={124}
+        className="max-w-full max-h-full object-contain"
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.visibility = 'hidden';
+        }}
+      />
+    </div>
+  );
+
   if (isLoading) {
     return (
       <section className="relative flex items-center justify-center h-screen w-full bg-gradient-to-br from-gray-100 to-gray-200 font-sans">
         <div className="absolute inset-0 z-0 blur-sm opacity-30 bg-[url('/media/bg2.png')] bg-cover bg-center" />
         <div className="relative z-10 w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl px-8 py-12 flex flex-col items-center text-center">
-          {/* Round video container */}
-          <div className="mb-6 rounded-full h-28 w-28 overflow-hidden ">
+          <div className="mb-6 rounded-full h-28 w-28 overflow-hidden">
             <video 
               autoPlay 
               loop 
@@ -235,73 +362,6 @@ const Banner = () => {
       </section>
     );
   }
-
-  const renderImage = (url: string, alt: string, className = "") => (
-    <div className={`w-16 h-16 flex items-center justify-center ${className}`}>
-      <Image 
-        src={`${process.env.NEXT_PUBLIC_API_URL}${url}`}
-        alt={alt}
-        width={124}  
-        height={124}
-        className="max-w-full max-h-full object-contain"
-        onError={(e) => {
-          (e.target as HTMLImageElement).style.visibility = 'hidden';
-        }}
-      />
-    </div>
-  );
-
- // Updated animation variants with proper typing
-  const viewVariants = {
-    enter: (direction: "forward" | "backward") => ({
-      x: direction === "forward" ? "100%" : "-100%",
-      opacity: 0
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-      transition: {
-        type: "tween" as const,
-        ease: "easeInOut" as const,
-        duration: 0.3
-      }
-    },
-    exit: (direction: "forward" | "backward") => ({
-      x: direction === "forward" ? "-30%" : "30%",
-      opacity: 0,
-      transition: {
-        type: "tween" as const,
-        ease: "easeInOut" as const,
-        duration: 0.2
-      }
-    })
-  };
-
-  const formItemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.2,
-        ease: "easeOut" as const
-      }
-    })
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.2,
-        ease: "easeOut" as const
-      }
-    })
-  };
 
   return (
     <section className="relative flex flex-col lg:flex-row min-h-[400px] lg:min-h-screen w-full overflow-hidden font-sans">
@@ -408,7 +468,7 @@ const Banner = () => {
                             }
                           }}
                           placeholder="ENTER MOBILE NUMBER"
-                          className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)]  text-sm sm:text-base transition-colors duration-200"
+                          className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm sm:text-base transition-colors duration-200"
                           required
                           disabled={otpVerified}
                         />
@@ -416,23 +476,25 @@ const Banner = () => {
                           <button
                             type="button"
                             onClick={handleSendOtp}
-                            disabled={isSendingOtp || otpSent}
-                            className="w-1/3 bg-blue-600 text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base"
+                            disabled={isSendingOtp || (otpSent && resendTimer > 0)}
+                            className={`w-1/3 text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg transition-all duration-200 text-sm sm:text-base ${
+                              isSendingOtp || (otpSent && resendTimer > 0)
+                                ? 'bg-blue-400'
+                                : 'bg-blue-600 hover:bg-blue-700'
+                            }`}
                           >
-                            {isSendingOtp ? "Sending..." : otpSent ? "Sent" : "Send OTP"}
+                            {isSendingOtp
+                              ? "Sending..."
+                              : otpSent && resendTimer > 0
+                              ? `${resendTimer}s`
+                              : otpSent
+                              ? "Resend"
+                              : "Send OTP"}
                           </button>
                         )}
                       </div>
                       {otpError && !otpSent && (
-                        <motion.p 
-                          className="mt-1 text-sm text-red-500"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {otpError}
-                        </motion.p>
+                        <p className="mt-1 text-sm text-red-500">{otpError}</p>
                       )}
                     </motion.div>
 
@@ -442,36 +504,37 @@ const Banner = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: 0.3 }}
                       >
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            maxLength={6}
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                            placeholder="ENTER OTP"
-                            className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)]  text-sm sm:text-base transition-colors duration-200"
-                            required
-                          />
-                          <button
-                            type="button"
-                            onClick={handleVerifyOtp}
-                            className="w-1/3 bg-blue-600 text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base"
-                          >
-                            Verify
-                          </button>
+                        <div className="mb-3">
+                          <p className="text-sm text-gray-600 mb-2">
+                            Enter 6-digit OTP sent to +91 {phone}
+                          </p>
+                          {otpError && (
+                            <p className="text-sm text-red-500">{otpError}</p>
+                          )}
                         </div>
-                        {otpError && (
-                          <motion.p 
-                            className="mt-1 text-sm text-red-500"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            {otpError}
-                          </motion.p>
+                        
+                        <div className="grid grid-cols-6 gap-2 mb-3 mr-1 ml-1">
+                          {Array.from({ length: 6 }).map((_, index) => (
+                            <input
+                              key={index}
+                              type="text"
+                              maxLength={1}
+                              value={otp[index] || ''}
+                              onChange={(e) => handleOtpChange(index, e.target.value)}
+                              onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                              ref={(el) => {
+                                if (el) otpInputRefs.current[index] = el;
+                              }}
+                              className="w-full h-12 sm:h-14 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                              inputMode="numeric"
+                              disabled={isSendingOtp}
+                            />
+                          ))}
+                        </div>
+                        {isSendingOtp && (
+                          <p className="text-sm text-blue-600 text-center">Verifying OTP...</p>
                         )}
                       </motion.div>
                     )}
@@ -479,22 +542,29 @@ const Banner = () => {
                     {otpVerified && (
                       <motion.div 
                         className="mb-4 p-2 bg-green-100 text-green-700 rounded text-center text-sm flex items-center justify-center"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
+                        <motion.div
+                          variants={checkmarkVariants}
+                          initial="initial"
+                          animate="animate"
+                          className="mr-2"
                         >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </motion.div>
                         Phone number verified successfully!
                       </motion.div>
                     )}
