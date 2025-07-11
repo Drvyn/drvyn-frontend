@@ -447,59 +447,60 @@ const Banner = () => {
                       </button>
                     </motion.div>  
 
-                    <motion.div 
-                      className="mb-4"
-                      variants={formItemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      custom={4}
-                    >
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <input
-                          type="tel"
-                          maxLength={10}
-                          value={phone}
-                          onChange={(e) => {
-                            setPhone(e.target.value);
-                            if (otpSent) {
-                              setOtpSent(false);
-                              setOtpVerified(false);
-                              setOtp("");
-                            }
-                          }}
-                          placeholder="ENTER MOBILE NUMBER"
-                          className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm sm:text-base transition-colors duration-200"
-                          required
-                          disabled={otpVerified}
-                        />
-                        {!otpVerified && (
-                          <button
-                            type="button"
-                            onClick={handleSendOtp}
-                            disabled={isSendingOtp || (otpSent && resendTimer > 0)}
-                            className={`text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg transition-all duration-200 text-sm sm:text-base ${
-                              isSendingOtp || (otpSent && resendTimer > 0)
-                                ? 'bg-blue-400'
-                                : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
-                            style={{
-                              minWidth: '120px' 
-                            }}
-                          >
-                            {isSendingOtp
-                              ? "Sending..."
-                              : otpSent && resendTimer > 0
-                              ? `${resendTimer}s`
-                              : otpSent
-                              ? "Resend"
-                              : "Send OTP"}
-                          </button>
-                        )}
-                      </div>
-                      {otpError && !otpSent && (
-                        <p className="mt-1 text-sm text-red-500">{otpError}</p>
-                      )}
-                    </motion.div>
+<motion.div 
+  className="mb-4"
+  variants={formItemVariants}
+  initial="hidden"
+  animate="visible"
+  custom={4}
+>
+  <div className="flex gap-2 w-full">
+    <div className="w-[70%]">
+      <input
+        type="tel"
+        maxLength={10}
+        value={phone}
+        onChange={(e) => {
+          setPhone(e.target.value);
+          if (otpSent) {
+            setOtpSent(false);
+            setOtpVerified(false);
+            setOtp("");
+          }
+        }}
+        placeholder="ENTER MOBILE NUMBER"
+        className="w-full border border-gray-300 p-3 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm transition-colors duration-200"
+        required
+        disabled={otpVerified}
+      />
+    </div>
+    <div className="w-[30%]">
+      {!otpVerified && (
+        <button
+          type="button"
+          onClick={handleSendOtp}
+          disabled={isSendingOtp || (otpSent && resendTimer > 0)}
+          className={`w-full text-white cursor-pointer font-semibold py-3 rounded-lg transition-all duration-200 text-sm ${
+            isSendingOtp || (otpSent && resendTimer > 0)
+              ? 'bg-blue-400'
+              : 'bg-blue-600 hover:bg-blue-700'
+          }`}
+        >
+          {isSendingOtp
+            ? "Sending..."
+            : otpSent && resendTimer > 0
+            ? `${resendTimer}s`
+            : otpSent
+            ? "Resend"
+            : "Send OTP"}
+        </button>
+      )}
+    </div>
+  </div>
+  {otpError && !otpSent && (
+    <p className="mt-1 text-sm text-red-500">{otpError}</p>
+  )}
+</motion.div>
 
                     {otpSent && !otpVerified && (
                       <motion.div 
