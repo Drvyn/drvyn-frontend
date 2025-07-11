@@ -454,7 +454,7 @@ const Banner = () => {
                       animate="visible"
                       custom={4}
                     >
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <input
                           type="tel"
                           maxLength={10}
@@ -477,11 +477,14 @@ const Banner = () => {
                             type="button"
                             onClick={handleSendOtp}
                             disabled={isSendingOtp || (otpSent && resendTimer > 0)}
-                            className={`w-1/3 text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg transition-all duration-200 text-sm sm:text-base ${
+                            className={`text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg transition-all duration-200 text-sm sm:text-base ${
                               isSendingOtp || (otpSent && resendTimer > 0)
                                 ? 'bg-blue-400'
                                 : 'bg-blue-600 hover:bg-blue-700'
                             }`}
+                            style={{
+                              minWidth: '120px' 
+                            }}
                           >
                             {isSendingOtp
                               ? "Sending..."
@@ -515,7 +518,7 @@ const Banner = () => {
                           )}
                         </div>
                         
-                        <div className="grid grid-cols-6 gap-2 mb-3 mr-1 ml-1">
+                        <div className="grid grid-cols-6 gap-2 mb-3">
                           {Array.from({ length: 6 }).map((_, index) => (
                             <input
                               key={index}
