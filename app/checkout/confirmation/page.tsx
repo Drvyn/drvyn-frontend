@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 type BookingDetails = {
   phone: string;
   date: string;
-  time: string;
+  time: string; 
   address: string;
   alternatePhone: string;
   serviceCenter: string;
@@ -79,12 +79,23 @@ const ConfirmationPage = () => {
     return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
-  const formatTime = (timeString: string) => {
-    return new Date(`1970-01-01T${timeString}`).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+  // Modified to handle the time slot format directly
+  const formatTime = (timeSlot: string) => {
+    // If it's already in the correct format (9:00 - 10:00), return as is
+    if (timeSlot.includes("-")) {
+      return timeSlot;
+    }
+    
+    // Fallback for old time format if needed
+    try {
+      return new Date(`1970-01-01T${timeSlot}`).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch {
+      return timeSlot; // Return as is if parsing fails
+    }
   };
 
   if (!bookingDetails) {
@@ -188,7 +199,7 @@ const ConfirmationPage = () => {
                   },
                   {
                     icon: <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />,
-                    label: "Service Time",
+                    label: "Service Time Slot",
                     value: formatTime(bookingDetails.time),
                     color: "bg-blue-100",
                   },
@@ -334,4 +345,4 @@ const ConfirmationPage = () => {
   );
 };
 
-export default ConfirmationPage;
+export default ConfirmationPage;  

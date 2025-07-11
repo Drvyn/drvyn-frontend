@@ -23,11 +23,17 @@ const CheckoutPage = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [carInfo, setCarInfo] = useState<CarInfo>({});
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
   const [address, setAddress] = useState("");
   const [alternatePhone, setAlternatePhone] = useState("");
   const [serviceCenter, setServiceCenter] = useState("COIMBATORE");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Generate time slots from 9 AM to 9 PM in hourly intervals
+  const timeSlots = Array.from({ length: 12 }, (_, i) => {
+    const hour = i + 9; // Starts at 9 AM
+    return `${hour}:00 - ${hour + 1}:00`;
+  });
 
   useEffect(() => {
     const cartData = sessionStorage.getItem("cart");
@@ -43,8 +49,13 @@ const CheckoutPage = () => {
   const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const validateForm = () => {
-    if (!selectedDate || !selectedTime) {
-      toast.error("Please select date and time for service");
+    if (!selectedDate) {
+      toast.error("Please select date for service");
+      return false;
+    }
+
+    if (!selectedTimeSlot) {
+      toast.error("Please select a time slot for service");
       return false;
     }
 
@@ -66,54 +77,54 @@ const CheckoutPage = () => {
 
     setIsSubmitting(true);
 
-  try {
-    const bookingDetails = {
-      brand: carInfo.brand || "",
-      model: carInfo.model || "",
-      fuelType: carInfo.fuelType || "",
-      year: carInfo.year || "",
-      phone: carInfo.phone || "",
-      date: selectedDate,
-      time: selectedTime,
-      address,
-      alternatePhone,
-      serviceCenter,
-      totalPrice,
-      cartItems: cart
-    };
+    try {
+      const bookingDetails = {
+        brand: carInfo.brand || "",
+        model: carInfo.model || "",
+        fuelType: carInfo.fuelType || "",
+        year: carInfo.year || "",
+        phone: carInfo.phone || "",
+        date: selectedDate,
+        time: selectedTimeSlot, // Now using the time slot
+        address,
+        alternatePhone,
+        serviceCenter,
+        totalPrice,
+        cartItems: cart
+      };
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/submit-booking`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(bookingDetails),
-    });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/submit-booking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingDetails),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Failed to submit booking");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to submit booking");
+      }
+      
+      // Store booking details in sessionStorage for confirmation page
+      sessionStorage.setItem("bookingDetails", JSON.stringify(bookingDetails));
+      sessionStorage.removeItem("cart");
+      router.push("/checkout/confirmation");
+    } catch (error) {
+      let errorMessage = "Failed to place order. Please try again.";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+
+      console.error("Order submission error:", error);
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    // Store booking details in sessionStorage for confirmation page
-    sessionStorage.setItem("bookingDetails", JSON.stringify(bookingDetails));
-    sessionStorage.removeItem("cart");
-    router.push("/checkout/confirmation");
-  } catch (error) {
-    let errorMessage = "Failed to place order. Please try again.";
-    
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (typeof error === "string") {
-      errorMessage = error;
-    }
-
-    console.error("Order submission error:", error);
-    toast.error(errorMessage);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -203,14 +214,23 @@ const CheckoutPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                    <FiClock className="mr-2 text-gray-500"/>Time *</label>
-                  <input
-                    type="time"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    required
-                  />
+                    <FiClock className="mr-2 text-gray-500"/>Time Slot *</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {timeSlots.map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setSelectedTimeSlot(slot)}
+                        className={`py-2 px-3 rounded-md border text-sm ${
+                          selectedTimeSlot === slot
+                            ? 'bg-blue-100 border-blue-500 text-blue-700'
+                            : 'border-gray-300 hover:border-blue-300'
+                        }`}
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
