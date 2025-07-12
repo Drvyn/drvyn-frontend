@@ -6,11 +6,11 @@ import SocialMedia from "@/components/SocialMedia";
 import Image from 'next/image';
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { auth } from "@/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 
 declare global {
   interface Window {
-    recaptchaVerifier: RecaptchaVerifier | undefined; 
+    recaptchaVerifier: RecaptchaVerifier | undefined;
   }
 }
 
@@ -57,7 +57,7 @@ const Banner = () => {
   const [resendTimer, setResendTimer] = useState(0);
   const [recaptchaReady, setRecaptchaReady] = useState(false);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
 
   const initializeRecaptcha = useCallback((retryCount = 0, maxRetries = 3) => {
@@ -93,7 +93,7 @@ const Banner = () => {
             window.recaptchaVerifier = undefined;
             initializeRecaptcha(retryCount + 1, maxRetries);
           },
-          'error-callback': (error: any) => {
+          'error-callback': (error: unknown) => {
             console.error("reCAPTCHA error:", error);
             setRecaptchaReady(false);
             setOtpError("Verification failed. Please try again.");
@@ -252,11 +252,29 @@ const Banner = () => {
     return () => clearTimeout(timer);
   }, [resendTimer]);
 
+  const handleVerifyOtp = useCallback(async () => {
+    if (otp.length !== 6 || !confirmationResult) return;
+
+    try {
+      setIsSendingOtp(true);
+      setOtpError("");
+      
+      await confirmationResult.confirm(otp);
+      setOtpVerified(true);
+      setOtpError("");
+    } catch (error: unknown) {
+      console.error("OTP verification error:", error);
+      setOtpError("Invalid OTP. Please try again.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  }, [otp, confirmationResult]);
+
   useEffect(() => {
     if (otp.length === 6 && !otpVerified) {
       handleVerifyOtp();
     }
-  }, [otp]);
+  }, [otp, otpVerified, handleVerifyOtp]);
 
   const filteredBrands = brands.filter(brand =>
     brand.brand.toLowerCase().includes(brandSearch.toLowerCase())
@@ -303,82 +321,68 @@ const Banner = () => {
     else if (currentView === "years") handleViewChange("fuels", "backward");
   };
 
-const handleSendOtp = async () => {
-  console.log("Send OTP clicked:", { recaptchaReady, isSendingOtp, resendTimer, phone });
-  const cleanedPhone = phone.replace(/\D/g, '');
-  if (!cleanedPhone || cleanedPhone.length !== 10) {
-    setOtpError("Please enter a valid 10-digit phone number");
-    return;
-  }
-
-  if (!navigator.onLine) {
-    setOtpError("No internet connection. Please check your network and try again.");
-    return;
-  }
-
-  if (!window.recaptchaVerifier || !recaptchaReady) {
-    console.log("Initializing reCAPTCHA...");
-    const initialized = initializeRecaptcha();
-    if (!initialized) {
-      setOtpError("Verification system is initializing. Please try again.");
+  const handleSendOtp = async () => {
+    console.log("Send OTP clicked:", { recaptchaReady, isSendingOtp, resendTimer, phone });
+    const cleanedPhone = phone.replace(/\D/g, '');
+    if (!cleanedPhone || cleanedPhone.length !== 10) {
+      setOtpError("Please enter a valid 10-digit phone number");
       return;
     }
-  }
 
-  try {
-    setIsSendingOtp(true);
-    setOtpError("");
-
-    if (!window.recaptchaVerifier) {
-      throw new Error("reCAPTCHA verifier not initialized");
+    if (!navigator.onLine) {
+      setOtpError("No internet connection. Please check your network and try again.");
+      return;
     }
 
-    const confirmation = await signInWithPhoneNumber(
-      auth,
-      `+91${cleanedPhone}`,
-      window.recaptchaVerifier
-    );
-
-    setConfirmationResult(confirmation);
-    setOtpSent(true);
-    setResendTimer(30);
-  } catch (error: any) {
-    console.error("OTP error:", error);
-    if (error.code === "auth/invalid-phone-number") {
-      setOtpError("Invalid phone number format");
-    } else if (error.code === "auth/too-many-requests") {
-      setOtpError("Too many attempts. Please wait a few minutes and try again.");
-    } else if (error.code === "auth/quota-exceeded") {
-      setOtpError("Verification limit reached. Please try again later.");
-    } else if (error.code === "auth/network-request-failed") {
-      setOtpError("Network error. Please check your connection and try again.");
-    } else if (error.code === "auth/billing-not-enabled") {
-      setOtpError("Phone verification is not enabled. Please contact support.");
-    } else {
-      setOtpError(error.message || "Failed to send OTP. Please try again.");
+    if (!window.recaptchaVerifier || !recaptchaReady) {
+      console.log("Initializing reCAPTCHA...");
+      const initialized = initializeRecaptcha();
+      if (!initialized) {
+        setOtpError("Verification system is initializing. Please try again.");
+        return;
+      }
     }
-    window.recaptchaVerifier = undefined;
-    setRecaptchaReady(false);
-  } finally {
-    console.log("Resetting isSendingOtp");
-    setIsSendingOtp(false);
-  }
-};
-
-  const handleVerifyOtp = async () => {
-    if (otp.length !== 6 || !confirmationResult) return;
 
     try {
       setIsSendingOtp(true);
       setOtpError("");
-      
-      await confirmationResult.confirm(otp);
-      setOtpVerified(true);
-      setOtpError("");
-    } catch (error: any) {
-      console.error("OTP verification error:", error);
-      setOtpError("Invalid OTP. Please try again.");
+
+      if (!window.recaptchaVerifier) {
+        throw new Error("reCAPTCHA verifier not initialized");
+      }
+
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        `+91${cleanedPhone}`,
+        window.recaptchaVerifier
+      );
+
+      setConfirmationResult(confirmation);
+      setOtpSent(true);
+      setResendTimer(30);
+    } catch (error: unknown) {
+      console.error("OTP error:", error);
+      if (error instanceof Error) {
+        if ((error as any).code === "auth/invalid-phone-number") {
+          setOtpError("Invalid phone number format");
+        } else if ((error as any).code === "auth/too-many-requests") {
+          setOtpError("Too many attempts. Please wait a few minutes and try again.");
+        } else if ((error as any).code === "auth/quota-exceeded") {
+          setOtpError("Verification limit reached. Please try again later.");
+        } else if ((error as any).code === "auth/network-request-failed") {
+          setOtpError("Network error. Please check your connection and try again.");
+        } else if ((error as any).code === "auth/billing-not-enabled") {
+          setOtpError("Phone verification is not enabled. Please contact support.");
+        } else {
+          setOtpError(error.message || "Failed to send OTP. Please try again.");
+        }
+      } else {
+        setOtpError("An unexpected error occurred. Please try again.");
+      }
+      window.recaptchaVerifier = undefined;
+      setRecaptchaReady(false);
     } finally {
+      console.log("Resetting isSendingOtp");
       setIsSendingOtp(false);
     }
   };
