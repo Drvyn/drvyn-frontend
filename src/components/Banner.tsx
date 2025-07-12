@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { BsChevronDown, BsArrowLeft, BsSearch } from "react-icons/bs";
 import SocialMedia from "@/components/SocialMedia";
 import Image from 'next/image';
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import { auth } from "@/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier | undefined; 
+  }
+}
 
 interface CarModel {
   name: string;
@@ -47,9 +55,93 @@ const Banner = () => {
   const [transitionDirection, setTransitionDirection] = useState<Direction>("forward");
   const [viewHeight, setViewHeight] = useState("auto");
   const [resendTimer, setResendTimer] = useState(0);
+  const [recaptchaReady, setRecaptchaReady] = useState(false);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+  const recaptchaContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const years = Array.from({length: 30}, (_, i) => (new Date().getFullYear() - i).toString());
+  const initializeRecaptcha = useCallback((retryCount = 0, maxRetries = 3) => {
+    if (typeof window === "undefined" || !auth || !recaptchaContainerRef.current) {
+      console.log("Initialization conditions not met");
+      setRecaptchaReady(false);
+      return false;
+    }
+
+    if (retryCount >= maxRetries) {
+      setOtpError("Verification system unavailable. Please try again later.");
+      return false;
+    }
+
+    try {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = undefined;
+      }
+
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        recaptchaContainerRef.current,
+        {
+          size: "invisible",
+          callback: () => {
+            console.log("reCAPTCHA verified");
+            setRecaptchaReady(true);
+          },
+          'expired-callback': () => {
+            console.log("reCAPTCHA expired, reinitializing...");
+            setRecaptchaReady(false);
+            window.recaptchaVerifier = undefined;
+            initializeRecaptcha(retryCount + 1, maxRetries);
+          },
+          'error-callback': (error: any) => {
+            console.error("reCAPTCHA error:", error);
+            setRecaptchaReady(false);
+            setOtpError("Verification failed. Please try again.");
+          },
+        }
+      );
+
+      window.recaptchaVerifier.render().then((widgetId) => {
+        console.log("reCAPTCHA widget ID:", widgetId);
+        setRecaptchaReady(true);
+      }).catch((error) => {
+        console.error("reCAPTCHA render error:", error);
+        setRecaptchaReady(false);
+        setOtpError("Failed to initialize verification. Please try again.");
+        window.recaptchaVerifier = undefined;
+      });
+
+      return true;
+    } catch (error) {
+      console.error("reCAPTCHA initialization error:", error);
+      setRecaptchaReady(false);
+      setOtpError("Verification system failed to initialize. Please try again.");
+      window.recaptchaVerifier = undefined;
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && auth) {
+      const initialize = () => {
+        if (recaptchaContainerRef.current) {
+          initializeRecaptcha();
+        } else {
+          setTimeout(initialize, 100);
+        }
+      };
+      initialize();
+    }
+
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = undefined;
+      }
+    };
+  }, [initializeRecaptcha]);
+
+  const years = Array.from({ length: 30 }, (_, i) => (new Date().getFullYear() - i).toString());
 
   const viewVariants: Variants = {
     enter: (direction: Direction) => ({
@@ -160,7 +252,6 @@ const Banner = () => {
     return () => clearTimeout(timer);
   }, [resendTimer]);
 
-  // Automatically verify OTP when all 6 digits are entered
   useEffect(() => {
     if (otp.length === 6 && !otpVerified) {
       handleVerifyOtp();
@@ -212,23 +303,81 @@ const Banner = () => {
     else if (currentView === "years") handleViewChange("fuels", "backward");
   };
 
-  const handleSendOtp = async () => {
-    if (!phone || phone.length !== 10) {
-      setOtpError("Please enter a valid 10-digit mobile number");
+const handleSendOtp = async () => {
+  console.log("Send OTP clicked:", { recaptchaReady, isSendingOtp, resendTimer, phone });
+  const cleanedPhone = phone.replace(/\D/g, '');
+  if (!cleanedPhone || cleanedPhone.length !== 10) {
+    setOtpError("Please enter a valid 10-digit phone number");
+    return;
+  }
+
+  if (!navigator.onLine) {
+    setOtpError("No internet connection. Please check your network and try again.");
+    return;
+  }
+
+  if (!window.recaptchaVerifier || !recaptchaReady) {
+    console.log("Initializing reCAPTCHA...");
+    const initialized = initializeRecaptcha();
+    if (!initialized) {
+      setOtpError("Verification system is initializing. Please try again.");
       return;
     }
+  }
+
+  try {
+    setIsSendingOtp(true);
+    setOtpError("");
+
+    if (!window.recaptchaVerifier) {
+      throw new Error("reCAPTCHA verifier not initialized");
+    }
+
+    const confirmation = await signInWithPhoneNumber(
+      auth,
+      `+91${cleanedPhone}`,
+      window.recaptchaVerifier
+    );
+
+    setConfirmationResult(confirmation);
+    setOtpSent(true);
+    setResendTimer(30);
+  } catch (error: any) {
+    console.error("OTP error:", error);
+    if (error.code === "auth/invalid-phone-number") {
+      setOtpError("Invalid phone number format");
+    } else if (error.code === "auth/too-many-requests") {
+      setOtpError("Too many attempts. Please wait a few minutes and try again.");
+    } else if (error.code === "auth/quota-exceeded") {
+      setOtpError("Verification limit reached. Please try again later.");
+    } else if (error.code === "auth/network-request-failed") {
+      setOtpError("Network error. Please check your connection and try again.");
+    } else if (error.code === "auth/billing-not-enabled") {
+      setOtpError("Phone verification is not enabled. Please contact support.");
+    } else {
+      setOtpError(error.message || "Failed to send OTP. Please try again.");
+    }
+    window.recaptchaVerifier = undefined;
+    setRecaptchaReady(false);
+  } finally {
+    console.log("Resetting isSendingOtp");
+    setIsSendingOtp(false);
+  }
+};
+
+  const handleVerifyOtp = async () => {
+    if (otp.length !== 6 || !confirmationResult) return;
 
     try {
       setIsSendingOtp(true);
       setOtpError("");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setOtpSent(true);
-      setOtp("");
-      setResendTimer(30);
+      
+      await confirmationResult.confirm(otp);
+      setOtpVerified(true);
       setOtpError("");
-    } catch (error) {
-      console.error("OTP error:", error); 
-      setOtpError("Failed to send OTP. Please try again.");
+    } catch (error: any) {
+      console.error("OTP verification error:", error);
+      setOtpError("Invalid OTP. Please try again.");
     } finally {
       setIsSendingOtp(false);
     }
@@ -241,7 +390,6 @@ const Banner = () => {
     newOtp[index] = value;
     setOtp(newOtp.join(''));
     
-    // Auto focus to next input
     if (value && index < 5 && otpInputRefs.current[index + 1]) {
       otpInputRefs.current[index + 1]?.focus();
     }
@@ -250,24 +398,6 @@ const Banner = () => {
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0 && otpInputRefs.current[index - 1]) {
       otpInputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (otp.length !== 6) return;
-
-    try {
-      setIsSendingOtp(true);
-      setOtpError("");
-      // Simulate verification
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setOtpVerified(true);
-      setOtpError("");
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      setOtpError("OTP verification failed. Please try again.");
-    } finally {
-      setIsSendingOtp(false);
     }
   };
 
@@ -293,7 +423,7 @@ const Banner = () => {
         image: selectedModel.imageUrl
       }));
   
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/submit-request`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/submit-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -305,10 +435,10 @@ const Banner = () => {
         }),
       });
   
+      if (!response.ok) throw new Error("Failed to submit request");
       window.location.href = '/service';
-  
     } catch (err) {
-      console.error("Submission error:", err); 
+      console.error("Submission error:", err);
       setError("Failed to submit. Please try again.");
     }
   };
@@ -318,7 +448,7 @@ const Banner = () => {
       <Image 
         src={`${process.env.NEXT_PUBLIC_API_URL}${url}`}
         alt={alt}
-        width={124}  
+        width={124}
         height={124}
         className="max-w-full max-h-full object-contain"
         onError={(e) => {
@@ -365,6 +495,13 @@ const Banner = () => {
 
   return (
     <section className="relative flex flex-col lg:flex-row min-h-[400px] lg:min-h-screen w-full overflow-hidden font-sans">
+      <div 
+        id="recaptcha-container" 
+        ref={recaptchaContainerRef} 
+        className="absolute opacity-0 w-1 h-1 overflow-hidden"
+        style={{ position: 'absolute', left: '-9999px' }}
+      />
+      
       <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: "url('/media/bg2.png')" }} />
 
       <div className="relative top-0 lg:-top-7 z-20 w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
@@ -383,7 +520,6 @@ const Banner = () => {
 
           <div className="relative overflow-hidden" style={{ minHeight: viewHeight }}>
             <AnimatePresence custom={transitionDirection} mode="wait">
-              {/* Main Form View */}
               {currentView === "form" && (
                 <motion.div
                   id="form-view"
@@ -455,18 +591,24 @@ const Banner = () => {
                       custom={4}
                     >
                       <div className="flex gap-2 w-full">
-                        {/* Mobile number input - 70% on mobile, grows on desktop */}
                         <div className="w-[70%] sm:flex-1">
                           <input
                             type="tel"
                             maxLength={10}
                             value={phone}
                             onChange={(e) => {
-                              setPhone(e.target.value);
+                              const value = e.target.value.replace(/\D/g, '');
+                              setPhone(value);
                               if (otpSent) {
                                 setOtpSent(false);
                                 setOtpVerified(false);
                                 setOtp("");
+                                if (window.recaptchaVerifier) {
+                                  window.recaptchaVerifier.clear();
+                                  window.recaptchaVerifier = undefined;
+                                  setRecaptchaReady(false);
+                                  initializeRecaptcha();
+                                }
                               }
                             }}
                             placeholder="ENTER MOBILE NUMBER"
@@ -476,15 +618,14 @@ const Banner = () => {
                           />
                         </div>
                         
-                        {/* OTP button - 30% on mobile, auto width on desktop */}
                         <div className="w-[30%] sm:w-auto">
                           {!otpVerified && (
                             <button
                               type="button"
                               onClick={handleSendOtp}
-                              disabled={isSendingOtp || (otpSent && resendTimer > 0)}
+                              disabled={isSendingOtp || (otpSent && resendTimer > 0) || !recaptchaReady}
                               className={`w-full sm:w-[120px] text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg transition-all duration-200 text-sm sm:text-base ${
-                                isSendingOtp || (otpSent && resendTimer > 0)
+                                isSendingOtp || (otpSent && resendTimer > 0) || !recaptchaReady
                                   ? 'bg-blue-400'
                                   : 'bg-blue-600 hover:bg-blue-700'
                               }`}
@@ -500,7 +641,7 @@ const Banner = () => {
                           )}
                         </div>
                       </div>
-                      {otpError && !otpSent && (
+                      {otpError && (
                         <p className="mt-1 text-sm text-red-500">{otpError}</p>
                       )}
                     </motion.div>
@@ -610,7 +751,6 @@ const Banner = () => {
                 </motion.div>
               )}
 
-              {/* Brands View */}
               {currentView === "brands" && (
                 <motion.div
                   key="brands"
@@ -670,9 +810,9 @@ const Banner = () => {
                             className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200" 
                             onClick={() => handleBrandSelect(brand)}
                             variants={cardVariants}
-                            custom={index}
                             initial="hidden"
                             animate="visible"
+                            custom={index}
                           >
                             {brand.logoUrl && renderImage(brand.logoUrl, brand.brand)}
                             <p className="text-xs sm:text-sm font-medium text-center mt-2">{brand.brand}</p>
@@ -684,7 +824,6 @@ const Banner = () => {
                 </motion.div>
               )}
 
-              {/* Models View */}
               {currentView === "models" && (
                 <motion.div
                   key="models"
@@ -758,7 +897,6 @@ const Banner = () => {
                 </motion.div>
               )}
 
-              {/* Fuels View */}
               {currentView === "fuels" && (
                 <motion.div
                   key="fuels"
@@ -821,7 +959,6 @@ const Banner = () => {
                 </motion.div>
               )}
 
-              {/* Years View */}
               {currentView === "years" && (
                 <motion.div
                   key="years"
