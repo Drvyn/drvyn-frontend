@@ -6,7 +6,7 @@ import SocialMedia from "@/components/SocialMedia";
 import Image from 'next/image';
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { auth } from "@/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, FirebaseError } from "firebase/auth";
 
 declare global {
   interface Window {
@@ -362,19 +362,26 @@ const Banner = () => {
       setResendTimer(30);
     } catch (error: unknown) {
       console.error("OTP error:", error);
-      if (error instanceof Error) {
-        if ((error as any).code === "auth/invalid-phone-number") {
-          setOtpError("Invalid phone number format");
-        } else if ((error as any).code === "auth/too-many-requests") {
-          setOtpError("Too many attempts. Please wait a few minutes and try again.");
-        } else if ((error as any).code === "auth/quota-exceeded") {
-          setOtpError("Verification limit reached. Please try again later.");
-        } else if ((error as any).code === "auth/network-request-failed") {
-          setOtpError("Network error. Please check your connection and try again.");
-        } else if ((error as any).code === "auth/billing-not-enabled") {
-          setOtpError("Phone verification is not enabled. Please contact support.");
-        } else {
-          setOtpError(error.message || "Failed to send OTP. Please try again.");
+      if (error instanceof FirebaseError) {
+        switch (error.code) {
+          case "auth/invalid-phone-number":
+            setOtpError("Invalid phone number format");
+            break;
+          case "auth/too-many-requests":
+            setOtpError("Too many attempts. Please wait a few minutes and try again.");
+            break;
+          case "auth/quota-exceeded":
+            setOtpError("Verification limit reached. Please try again later.");
+            break;
+          case "auth/network-request-failed":
+            setOtpError("Network error. Please check your connection and try again.");
+            break;
+          case "auth/billing-not-enabled":
+            setOtpError("Phone verification is not enabled. Please contact support.");
+            break;
+          default:
+            setOtpError(error.message || "Failed to send OTP. Please try again.");
+            break;
         }
       } else {
         setOtpError("An unexpected error occurred. Please try again.");
