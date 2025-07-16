@@ -9,12 +9,12 @@ declare global {
 }
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyBcYTi5dgw0cjQtAFLqQUfvPfsljQ3jRkQ",
+  authDomain: "drvynin-d0c73.firebaseapp.com",
+  projectId: "drvynin-d0c73",
+  storageBucket: "drvynin-d0c73.firebasestorage.app",
+  messagingSenderId: "316617020168",
+  appId: "1:316617020168:web:ad780796af3037d1fe52bd"
 };
 
 const app = initializeApp(firebaseConfig);

@@ -71,7 +71,7 @@ export default function PhoneLoginForm() {
       }
 
       await confirmationResult.confirm(otp);
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'OTP verification failed');
     } finally {

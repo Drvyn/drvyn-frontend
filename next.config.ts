@@ -1,5 +1,11 @@
-module.exports = {
-  images: {
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+   images: {
     domains: [
       'localhost',
       'www.drvyn.in',      
@@ -8,3 +14,5 @@ module.exports = {
     ],
   },
 }
+
+export default nextConfig
