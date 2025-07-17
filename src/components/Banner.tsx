@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BsChevronDown, BsArrowLeft, BsSearch } from "react-icons/bs";
 import SocialMedia from "@/components/SocialMedia";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
+import { useAuth } from "../auth/useAuth";
 
 interface CarModel {
   name: string;
@@ -33,25 +34,30 @@ const Banner = () => {
   const [selectedModel, setSelectedModel] = useState<CarModel | null>(null);
   const [selectedFuel, setSelectedFuel] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<ViewType>("form");
   const [brandSearch, setBrandSearch] = useState("");
   const [modelSearch, setModelSearch] = useState("");
   const [fuelIcons, setFuelIcons] = useState<FuelType[]>([]);
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [otpError, setOtpError] = useState("");
   const [transitionDirection, setTransitionDirection] = useState<Direction>("forward");
   const [viewHeight, setViewHeight] = useState("auto");
-  const [resendTimer, setResendTimer] = useState(0);
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [retryCount, setRetryCount] = useState(0);
-  const [isVerifying, setIsVerifying] = useState(false);
+
+  const {
+    phone,
+    setPhone,
+    otp,
+    setOtp,
+    otpSent,
+    otpVerified,
+    isSendingOtp,
+    otpError,
+    resendTimer,
+    handleSendOtp,
+    handleOtpChange,
+    handleOtpKeyDown,
+  } = useAuth(otpInputRefs);
 
   const years = Array.from({ length: 30 }, (_, i) => (new Date().getFullYear() - i).toString());
 
@@ -118,7 +124,7 @@ const Banner = () => {
     },
   };
 
-  const fetchInitialData = useCallback(async () => {
+  const fetchInitialData = async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -147,21 +153,20 @@ const Banner = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchInitialData();
-  }, [fetchInitialData]);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (error && retryCount < 3) {
-        setRetryCount((c) => c + 1);
+      if (error) {
         fetchInitialData();
       }
     }, 3000);
     return () => clearTimeout(timer);
-  }, [error, retryCount, fetchInitialData]);
+  }, [error]);
 
   useEffect(() => {
     const formElement = document.getElementById("form-view");
@@ -169,122 +174,6 @@ const Banner = () => {
       setViewHeight(`${formElement.scrollHeight}px`);
     }
   }, [currentView]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (resendTimer > 0) {
-      timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [resendTimer]);
-
-  const handleSendOtp = async () => {
-    const cleanedPhone = phone.replace(/\D/g, "");
-    if (!cleanedPhone || cleanedPhone.length !== 10) {
-      setOtpError("Please enter a valid 10-digit phone number");
-      return;
-    }
-
-    if (!navigator.onLine) {
-      setOtpError("No internet connection. Please check your network and try again.");
-      return;
-    }
-
-    try {
-      setIsSendingOtp(true);
-      setOtpError("");
-
-      const phoneToSend = `91${cleanedPhone}`;
-      const response = await fetch(
-        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_TWO_FACTOR_API_KEY}/SMS/${phoneToSend}/AUTOGEN`,
-        { method: "GET" }
-      );
-
-      const data = await response.json();
-      console.log("Send OTP response:", data);
-      if (data.Status === "Success") {
-        setOtpSent(true);
-        setResendTimer(30);
-        setOtpVerified(false);
-        setOtp("");
-        setSessionId(data.Details);
-      } else {
-        throw new Error(data.Details || "Failed to send OTP");
-      }
-    } catch (error) {
-      console.error("OTP send error:", error);
-      let errorMessage = "Failed to send OTP. Please try again.";
-      if (error instanceof Error) {
-        if (error.message.includes("Invalid API Key")) {
-          errorMessage = "Service configuration error. Please contact support.";
-        } else if (error.message.includes("Insufficient Credits")) {
-          errorMessage = "Service temporarily unavailable. Please try again later or check SMS credits.";
-        } else if (error.message.includes("Invalid Number")) {
-          errorMessage = "Invalid phone number. Please check and try again.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      setOtpError(errorMessage);
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  const handleVerifyOtp = useCallback(async () => {
-    if (otp.length !== 6) {
-      setOtpError("Please enter a 6-digit OTP.");
-      return;
-    }
-
-    if (!sessionId) {
-      setOtpError("No session ID available. Please request a new OTP.");
-      return;
-    }
-
-    setIsSendingOtp(true);
-    setOtpError("");
-
-    try {
-      const response = await fetch(
-        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_TWO_FACTOR_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`,
-        { method: "GET" }
-      );
-
-      const data = await response.json();
-      console.log("Verify OTP response:", data);
-      if (data.Status === "Success" && data.Details === "OTP Matched") {
-        setOtpVerified(true);
-        setOtpError("");
-      } else if (data.Details === "OTP Mismatch") {
-        setOtpError("Invalid OTP. Please try again.");
-      } else if (data.Details === "OTP Expired") {
-        setOtpError("OTP has expired. Please request a new one.");
-        setOtpSent(false);
-        setSessionId(null);
-      } else if (data.Details === "Invalid Session") {
-        setOtpError("Invalid session. Please request a new OTP.");
-        setOtpSent(false);
-        setSessionId(null);
-      } else {
-        setOtpError(`Verification failed: ${data.Details || "Unknown error"}`);
-      }
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      setOtpError("Failed to verify OTP. Please try again.");
-    } finally {
-      setIsSendingOtp(false);
-    }
-  }, [otp, sessionId]);
-
-  useEffect(() => {
-    if (otp.length === 6 && !otpVerified && sessionId && !isVerifying) {
-      setIsVerifying(true);
-      handleVerifyOtp().finally(() => {
-        setIsVerifying(false);
-      });
-    }
-  }, [otp, otpVerified, sessionId, handleVerifyOtp]);
 
   const filteredBrands = brands.filter((brand) =>
     brand.brand.toLowerCase().includes(brandSearch.toLowerCase())
@@ -329,24 +218,6 @@ const Banner = () => {
     if (currentView === "models") handleViewChange("brands", "backward");
     else if (currentView === "fuels") handleViewChange("models", "backward");
     else if (currentView === "years") handleViewChange("fuels", "backward");
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = otp.split("");
-    newOtp[index] = value;
-    setOtp(newOtp.join(""));
-
-    if (value && index < 5 && otpInputRefs.current[index + 1]) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0 && otpInputRefs.current[index - 1]) {
-      otpInputRefs.current[index - 1]?.focus();
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -447,7 +318,6 @@ const Banner = () => {
   return (
     <section className="relative flex flex-col lg:flex-row min-h-[400px] lg:min-h-screen w-full overflow-hidden font-sans">
       <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: "url('/media/bg2.png')" }} />
-
       <div className="relative top-0 lg:-top-7 z-20 w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="w-full max-w-md sm:max-w-lg bg-white shadow-xl p-6 sm:p-8 md:p-10 rounded-xl">
           {error && (
@@ -467,7 +337,6 @@ const Banner = () => {
               </button>
             </motion.div>
           )}
-
           <div className="relative overflow-hidden" style={{ minHeight: viewHeight }}>
             <AnimatePresence custom={transitionDirection} mode="wait">
               {currentView === "form" && (
@@ -499,7 +368,6 @@ const Banner = () => {
                     >
                       Get instant quotes for your car service
                     </motion.p>
-
                     <motion.div
                       className="mb-4 p-3 sm:p-4 border border-gray-300 rounded-lg flex justify-between items-center"
                       variants={formItemVariants}
@@ -510,7 +378,6 @@ const Banner = () => {
                       <span className="font-medium">COIMBATORE</span>
                       <BsChevronDown className="text-gray-500" />
                     </motion.div>
-
                     <motion.div
                       className="mb-4"
                       variants={formItemVariants}
@@ -532,7 +399,6 @@ const Banner = () => {
                         <BsChevronDown className="text-gray-500" />
                       </button>
                     </motion.div>
-
                     <motion.div
                       className="mb-4"
                       variants={formItemVariants}
@@ -549,12 +415,6 @@ const Banner = () => {
                             onChange={(e) => {
                               const value = e.target.value.replace(/\D/g, "");
                               setPhone(value);
-                              if (otpSent) {
-                                setOtpSent(false);
-                                setOtpVerified(false);
-                                setOtp("");
-                                setSessionId(null);
-                              }
                             }}
                             placeholder="ENTER MOBILE NUMBER"
                             className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm sm:text-base transition-colors duration-200"
@@ -586,7 +446,6 @@ const Banner = () => {
                         </div>
                       </div>
                     </motion.div>
-
                     {otpSent && !otpVerified && (
                       <motion.div
                         className="mb-4"
@@ -626,7 +485,6 @@ const Banner = () => {
                         )}
                       </motion.div>
                     )}
-
                     {otpVerified && (
                       <motion.div
                         className="mb-4 p-2 bg-green-100 text-green-700 rounded text-center text-sm flex items-center justify-center"
@@ -656,7 +514,6 @@ const Banner = () => {
                         Phone number verified successfully!
                       </motion.div>
                     )}
-
                     <motion.button
                       type="submit"
                       className="w-full bg-blue-600 text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md text-base sm:text-lg"
@@ -668,7 +525,6 @@ const Banner = () => {
                     >
                       {isLoading ? "PROCESSING..." : "CHECK PRICES FOR FREE"}
                     </motion.button>
-
                     <motion.div
                       className="mt-6 sm:mt-8 flex justify-between text-xs sm:text-sm text-gray-600"
                       variants={formItemVariants}
@@ -690,7 +546,6 @@ const Banner = () => {
                   </form>
                 </motion.div>
               )}
-
               {currentView === "brands" && (
                 <motion.div
                   key="brands"
@@ -710,7 +565,6 @@ const Banner = () => {
                     </button>
                     <h2 className="text-lg sm:text-xl font-bold">Select Manufacturer</h2>
                   </div>
-
                   <motion.div
                     className="relative mb-4"
                     initial={{ opacity: 0, y: 10 }}
@@ -726,7 +580,6 @@ const Banner = () => {
                       className="w-full pl-10 border border-gray-300 rounded-lg px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                     />
                   </motion.div>
-
                   <div className="h-[400px] overflow-y-auto">
                     {filteredBrands.length === 0 ? (
                       <motion.p
@@ -763,7 +616,6 @@ const Banner = () => {
                   </div>
                 </motion.div>
               )}
-
               {currentView === "models" && (
                 <motion.div
                   key="models"
@@ -783,7 +635,6 @@ const Banner = () => {
                     </button>
                     <h2 className="text-lg sm:text-xl font-bold">Select Model</h2>
                   </div>
-
                   <motion.div
                     className="relative mb-4"
                     initial={{ opacity: 0, y: 10 }}
@@ -799,7 +650,6 @@ const Banner = () => {
                       className="w-full pl-10 border border-gray-300 rounded-lg px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                     />
                   </motion.div>
-
                   <div className="h-[400px] overflow-y-auto">
                     {filteredModels.length === 0 ? (
                       <motion.p
@@ -836,7 +686,6 @@ const Banner = () => {
                   </div>
                 </motion.div>
               )}
-
               {currentView === "fuels" && (
                 <motion.div
                   key="fuels"
@@ -856,7 +705,6 @@ const Banner = () => {
                     </button>
                     <h2 className="text-lg sm:text-xl font-bold">Select Fuel Type</h2>
                   </div>
-
                   <div className="h-[400px] overflow-y-auto">
                     {selectedModel?.fuel_types?.length === 0 ? (
                       <motion.p
@@ -896,7 +744,6 @@ const Banner = () => {
                   </div>
                 </motion.div>
               )}
-
               {currentView === "years" && (
                 <motion.div
                   key="years"
@@ -916,7 +763,6 @@ const Banner = () => {
                     </button>
                     <h2 className="text-lg sm:text-xl font-bold">Select Manufacturing Year</h2>
                   </div>
-
                   <div className="h-[400px] overflow-y-auto">
                     {years.length === 0 ? (
                       <motion.p
