@@ -182,7 +182,7 @@ const ConfirmationPage = () => {
                   {
                     icon: <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />,
                     label: "Contact Number",
-                    value: `+91 ${bookingDetails.phone}`,
+                    value: `${bookingDetails.phone}`,
                     color: "bg-blue-100",
                   },
                   ...(bookingDetails.alternatePhone ? [{

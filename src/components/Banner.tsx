@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { BsChevronDown, BsArrowLeft, BsSearch } from "react-icons/bs";
 import SocialMedia from "@/components/SocialMedia";
-import Image from 'next/image';
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
 
 interface CarModel {
   name: string;
@@ -39,15 +40,25 @@ const Banner = () => {
   const [brandSearch, setBrandSearch] = useState("");
   const [modelSearch, setModelSearch] = useState("");
   const [fuelIcons, setFuelIcons] = useState<FuelType[]>([]);
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [otpError, setOtpError] = useState("");
   const [transitionDirection, setTransitionDirection] = useState<Direction>("forward");
   const [viewHeight, setViewHeight] = useState("auto");
+  const [resendTimer, setResendTimer] = useState(0);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const years = Array.from({ length: 30 }, (_, i) => (new Date().getFullYear() - i).toString());
 
   const viewVariants: Variants = {
     enter: (direction: Direction) => ({
       x: direction === "forward" ? "100%" : "-100%",
-      opacity: 0
+      opacity: 0,
     }),
     center: {
       x: 0,
@@ -55,8 +66,8 @@ const Banner = () => {
       transition: {
         type: "tween",
         ease: "easeInOut",
-        duration: 0.3
-      }
+        duration: 0.3,
+      },
     },
     exit: (direction: Direction) => ({
       x: direction === "forward" ? "-30%" : "30%",
@@ -64,9 +75,9 @@ const Banner = () => {
       transition: {
         type: "tween",
         ease: "easeInOut",
-        duration: 0.2
-      }
-    })
+        duration: 0.2,
+      },
+    }),
   };
 
   const formItemVariants: Variants = {
@@ -77,9 +88,9 @@ const Banner = () => {
       transition: {
         delay: i * 0.05,
         duration: 0.2,
-        ease: "easeOut"
-      }
-    })
+        ease: "easeOut",
+      },
+    }),
   };
 
   const cardVariants: Variants = {
@@ -90,66 +101,196 @@ const Banner = () => {
       transition: {
         delay: i * 0.05,
         duration: 0.2,
-        ease: "easeOut"
-      }
-    })
+        ease: "easeOut",
+      },
+    }),
   };
 
   const checkmarkVariants: Variants = {
     initial: { scale: 0 },
-    animate: { 
+    animate: {
       scale: 1,
       transition: {
         type: "spring",
         stiffness: 500,
-        damping: 20
-      }
-    }
+        damping: 20,
+      },
+    },
   };
 
-  const fetchInitialData = async () => {
+  const fetchInitialData = useCallback(async () => {
     try {
       setIsLoading(true);
-      
+      setError(null);
+
       const [brandsRes, fuelsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/all-brands`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/fuel-icons`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/all-brands`).catch(() => {
+          throw new Error("Failed to fetch brands");
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/fuel-icons`).catch(() => {
+          throw new Error("Failed to fetch fuel icons");
+        }),
       ]);
 
-      if (!brandsRes.ok || !fuelsRes.ok) throw new Error("Failed to fetch data");
+      if (!brandsRes.ok) throw new Error("Brands API response not OK");
+      if (!fuelsRes.ok) throw new Error("Fuel icons API response not OK");
 
-      const [brandsData, fuelsData] = await Promise.all([
-        brandsRes.json(),
-        fuelsRes.json()
-      ]);
+      const [brandsData, fuelsData] = await Promise.all([brandsRes.json(), fuelsRes.json()]);
 
-      setBrands(brandsData);
-      setFuelIcons(fuelsData);
+      setBrands(brandsData || []);
+      setFuelIcons(fuelsData || []);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to load data";
-      setError(message);
-      console.error("Fetch error:", error); 
+      console.error("Fetch error:", error);
+      setError("Failed to load data. Please try again later.");
+      setBrands([]);
+      setFuelIcons([]);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchInitialData();
   }, []);
 
   useEffect(() => {
-    const formElement = document.getElementById('form-view');
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (error && retryCount < 3) {
+        setRetryCount((c) => c + 1);
+        fetchInitialData();
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [error, retryCount, fetchInitialData]);
+
+  useEffect(() => {
+    const formElement = document.getElementById("form-view");
     if (formElement) {
       setViewHeight(`${formElement.scrollHeight}px`);
     }
   }, [currentView]);
 
-  const filteredBrands = brands.filter(brand =>
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendTimer > 0) {
+      timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendTimer]);
+
+  const handleSendOtp = async () => {
+    const cleanedPhone = phone.replace(/\D/g, "");
+    if (!cleanedPhone || cleanedPhone.length !== 10) {
+      setOtpError("Please enter a valid 10-digit phone number");
+      return;
+    }
+
+    if (!navigator.onLine) {
+      setOtpError("No internet connection. Please check your network and try again.");
+      return;
+    }
+
+    try {
+      setIsSendingOtp(true);
+      setOtpError("");
+
+      const phoneToSend = `91${cleanedPhone}`;
+      const response = await fetch(
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_TWO_FACTOR_API_KEY}/SMS/${phoneToSend}/AUTOGEN`,
+        { method: "GET" }
+      );
+
+      const data = await response.json();
+      console.log("Send OTP response:", data);
+      if (data.Status === "Success") {
+        setOtpSent(true);
+        setResendTimer(30);
+        setOtpVerified(false);
+        setOtp("");
+        setSessionId(data.Details);
+      } else {
+        throw new Error(data.Details || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error("OTP send error:", error);
+      let errorMessage = "Failed to send OTP. Please try again.";
+      if (error instanceof Error) {
+        if (error.message.includes("Invalid API Key")) {
+          errorMessage = "Service configuration error. Please contact support.";
+        } else if (error.message.includes("Insufficient Credits")) {
+          errorMessage = "Service temporarily unavailable. Please try again later or check SMS credits.";
+        } else if (error.message.includes("Invalid Number")) {
+          errorMessage = "Invalid phone number. Please check and try again.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      setOtpError(errorMessage);
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = useCallback(async () => {
+    if (otp.length !== 6) {
+      setOtpError("Please enter a 6-digit OTP.");
+      return;
+    }
+
+    if (!sessionId) {
+      setOtpError("No session ID available. Please request a new OTP.");
+      return;
+    }
+
+    setIsSendingOtp(true);
+    setOtpError("");
+
+    try {
+      const response = await fetch(
+        `https://2factor.in/API/V1/${process.env.NEXT_PUBLIC_TWO_FACTOR_API_KEY}/SMS/VERIFY/${sessionId}/${otp}`,
+        { method: "GET" }
+      );
+
+      const data = await response.json();
+      console.log("Verify OTP response:", data);
+      if (data.Status === "Success" && data.Details === "OTP Matched") {
+        setOtpVerified(true);
+        setOtpError("");
+      } else if (data.Details === "OTP Mismatch") {
+        setOtpError("Invalid OTP. Please try again.");
+      } else if (data.Details === "OTP Expired") {
+        setOtpError("OTP has expired. Please request a new one.");
+        setOtpSent(false);
+        setSessionId(null);
+      } else if (data.Details === "Invalid Session") {
+        setOtpError("Invalid session. Please request a new OTP.");
+        setOtpSent(false);
+        setSessionId(null);
+      } else {
+        setOtpError(`Verification failed: ${data.Details || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      setOtpError("Failed to verify OTP. Please try again.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  }, [otp, sessionId]);
+
+  useEffect(() => {
+    if (otp.length === 6 && !otpVerified && sessionId && !isVerifying) {
+      setIsVerifying(true);
+      handleVerifyOtp().finally(() => {
+        setIsVerifying(false);
+      });
+    }
+  }, [otp, otpVerified, sessionId, handleVerifyOtp]);
+
+  const filteredBrands = brands.filter((brand) =>
     brand.brand.toLowerCase().includes(brandSearch.toLowerCase())
   );
 
-  const filteredModels = (selectedBrand?.models || []).filter(model =>
+  const filteredModels = (selectedBrand?.models || []).filter((model) =>
     model.name.toLowerCase().includes(modelSearch.toLowerCase())
   );
 
@@ -190,23 +331,49 @@ const Banner = () => {
     else if (currentView === "years") handleViewChange("fuels", "backward");
   };
 
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = otp.split("");
+    newOtp[index] = value;
+    setOtp(newOtp.join(""));
+
+    if (value && index < 5 && otpInputRefs.current[index + 1]) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0 && otpInputRefs.current[index - 1]) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBrand || !selectedModel || !selectedFuel || !selectedYear || !phone) {
       setError("Please fill all fields");
       return;
     }
-  
+
+    if (!otpVerified) {
+      setError("Please verify your phone number with OTP");
+      return;
+    }
+
     try {
-      sessionStorage.setItem('carFormData', JSON.stringify({
-        brand: selectedBrand.brand,
-        model: selectedModel.name,
-        fuelType: selectedFuel,
-        year: selectedYear,
-        phone,
-        image: selectedModel.imageUrl
-      }));
-  
+      sessionStorage.setItem(
+        "carFormData",
+        JSON.stringify({
+          brand: selectedBrand.brand,
+          model: selectedModel.name,
+          fuelType: selectedFuel,
+          year: selectedYear,
+          phone: `+91${phone}`,
+          image: selectedModel.imageUrl,
+        })
+      );
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/submit-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -215,12 +382,12 @@ const Banner = () => {
           model: selectedModel.name,
           fuelType: selectedFuel,
           year: selectedYear,
-          phone,
+          phone: `+91${phone}`,
         }),
       });
-  
+
       if (!response.ok) throw new Error("Failed to submit request");
-      window.location.href = '/service';
+      window.location.href = "/service";
     } catch (err) {
       console.error("Submission error:", err);
       setError("Failed to submit. Please try again.");
@@ -229,14 +396,14 @@ const Banner = () => {
 
   const renderImage = (url: string, alt: string, className = "") => (
     <div className={`w-16 h-16 flex items-center justify-center ${className}`}>
-      <Image 
+      <Image
         src={`${process.env.NEXT_PUBLIC_API_URL}${url}`}
         alt={alt}
         width={124}
         height={124}
         className="max-w-full max-h-full object-contain"
         onError={(e) => {
-          (e.target as HTMLImageElement).style.visibility = 'hidden';
+          (e.target as HTMLImageElement).style.visibility = "hidden";
         }}
       />
     </div>
@@ -248,10 +415,10 @@ const Banner = () => {
         <div className="absolute inset-0 z-0 blur-sm opacity-30 bg-[url('/media/bg2.png')] bg-cover bg-center" />
         <div className="relative z-10 w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl px-8 py-12 flex flex-col items-center text-center">
           <div className="mb-6 rounded-full h-28 w-28 overflow-hidden">
-            <video 
-              autoPlay 
-              loop 
-              muted 
+            <video
+              autoPlay
+              loop
+              muted
               playsInline
               className="h-full w-full object-cover"
               onPlay={(e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -284,14 +451,20 @@ const Banner = () => {
       <div className="relative top-0 lg:-top-7 z-20 w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="w-full max-w-md sm:max-w-lg bg-white shadow-xl p-6 sm:p-8 md:p-10 rounded-xl">
           {error && (
-            <motion.div 
-              className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center"
+            <motion.div
+              className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center flex justify-between items-center"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {error}
+              <span>{error}</span>
+              <button
+                onClick={fetchInitialData}
+                className="ml-2 px-2 py-1 bg-red-200 rounded hover:bg-red-300 text-sm"
+              >
+                Retry
+              </button>
             </motion.div>
           )}
 
@@ -308,7 +481,7 @@ const Banner = () => {
                   exit="exit"
                 >
                   <form onSubmit={handleSubmit} className="w-full">
-                    <motion.h2 
+                    <motion.h2
                       className="text-2xl sm:text-3xl font-extrabold mb-4 text-black leading-tight"
                       variants={formItemVariants}
                       initial="hidden"
@@ -317,7 +490,7 @@ const Banner = () => {
                     >
                       Experience Premier Car Services In Coimbatore
                     </motion.h2>
-                    <motion.p 
+                    <motion.p
                       className="mb-6 text-gray-600 text-base sm:text-lg"
                       variants={formItemVariants}
                       initial="hidden"
@@ -327,7 +500,7 @@ const Banner = () => {
                       Get instant quotes for your car service
                     </motion.p>
 
-                    <motion.div 
+                    <motion.div
                       className="mb-4 p-3 sm:p-4 border border-gray-300 rounded-lg flex justify-between items-center"
                       variants={formItemVariants}
                       initial="hidden"
@@ -338,7 +511,7 @@ const Banner = () => {
                       <BsChevronDown className="text-gray-500" />
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       className="mb-4"
                       variants={formItemVariants}
                       initial="hidden"
@@ -358,28 +531,131 @@ const Banner = () => {
                         </span>
                         <BsChevronDown className="text-gray-500" />
                       </button>
-                    </motion.div>  
+                    </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       className="mb-4"
                       variants={formItemVariants}
                       initial="hidden"
                       animate="visible"
                       custom={4}
                     >
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        value={phone}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '');
-                          setPhone(value);
-                        }}
-                        placeholder="ENTER MOBILE NUMBER"
-                        className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm sm:text-base transition-colors duration-200"
-                        required
-                      />
+                      <div className="flex gap-2 w-full">
+                        <div className="w-[70%] sm:flex-1">
+                          <input
+                            type="tel"
+                            maxLength={10}
+                            value={phone}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, "");
+                              setPhone(value);
+                              if (otpSent) {
+                                setOtpSent(false);
+                                setOtpVerified(false);
+                                setOtp("");
+                                setSessionId(null);
+                              }
+                            }}
+                            placeholder="ENTER MOBILE NUMBER"
+                            className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm sm:text-base transition-colors duration-200"
+                            required
+                            disabled={otpVerified}
+                          />
+                        </div>
+                        <div className="w-[30%] sm:w-auto">
+                          {!otpVerified && (
+                            <button
+                              type="button"
+                              onClick={handleSendOtp}
+                              disabled={isSendingOtp || (otpSent && resendTimer > 0)}
+                              className={`w-full sm:w-[120px] text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg transition-all duration-200 text-sm sm:text-base ${
+                                isSendingOtp || (otpSent && resendTimer > 0)
+                                  ? "bg-blue-400"
+                                  : "bg-blue-600 hover:bg-blue-700"
+                              }`}
+                            >
+                              {isSendingOtp
+                                ? "Sending..."
+                                : otpSent && resendTimer > 0
+                                ? `${resendTimer}s`
+                                : otpSent
+                                ? "Resend"
+                                : "Send OTP"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </motion.div>
+
+                    {otpSent && !otpVerified && (
+                      <motion.div
+                        className="mb-4"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="mb-3">
+                          <p className="text-sm text-gray-600 mb-2">
+                            Enter 6-digit OTP sent to +91 {phone}
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-6 gap-2 mb-3 mr-1 ml-1">
+                          {Array.from({ length: 6 }).map((_, index) => (
+                            <input
+                              key={index}
+                              type="text"
+                              maxLength={1}
+                              value={otp[index] || ""}
+                              onChange={(e) => handleOtpChange(index, e.target.value)}
+                              onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                              ref={(el) => {
+                                if (el) otpInputRefs.current[index] = el;
+                              }}
+                              className="w-full h-12 sm:h-14 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                              inputMode="numeric"
+                              disabled={isSendingOtp}
+                            />
+                          ))}
+                        </div>
+                        {otpError && (
+                          <p className="mt-1 text-sm text-red-500 text-center">{otpError}</p>
+                        )}
+                        {isSendingOtp && (
+                          <p className="text-sm text-blue-600 text-center">Verifying OTP...</p>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {otpVerified && (
+                      <motion.div
+                        className="mb-4 p-2 bg-green-100 text-green-700 rounded text-center text-sm flex items-center justify-center"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <motion.div
+                          variants={checkmarkVariants}
+                          initial="initial"
+                          animate="animate"
+                          className="mr-2"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </motion.div>
+                        Phone number verified successfully!
+                      </motion.div>
+                    )}
 
                     <motion.button
                       type="submit"
@@ -393,7 +669,7 @@ const Banner = () => {
                       {isLoading ? "PROCESSING..." : "CHECK PRICES FOR FREE"}
                     </motion.button>
 
-                    <motion.div 
+                    <motion.div
                       className="mt-6 sm:mt-8 flex justify-between text-xs sm:text-sm text-gray-600"
                       variants={formItemVariants}
                       initial="hidden"
@@ -426,16 +702,16 @@ const Banner = () => {
                   className="w-full"
                 >
                   <div className="flex items-center mb-4">
-                    <button 
-                      onClick={() => handleViewChange("form", "backward")} 
+                    <button
+                      onClick={() => handleViewChange("form", "backward")}
                       className="mr-2 text-gray-500 hover:text-black transition-colors duration-200"
                     >
                       <BsArrowLeft size={20} />
                     </button>
                     <h2 className="text-lg sm:text-xl font-bold">Select Manufacturer</h2>
                   </div>
-                  
-                  <motion.div 
+
+                  <motion.div
                     className="relative mb-4"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -450,10 +726,10 @@ const Banner = () => {
                       className="w-full pl-10 border border-gray-300 rounded-lg px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                     />
                   </motion.div>
-                  
+
                   <div className="h-[400px] overflow-y-auto">
                     {filteredBrands.length === 0 ? (
-                      <motion.p 
+                      <motion.p
                         className="text-center py-8 text-gray-500"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -462,16 +738,16 @@ const Banner = () => {
                         {brands.length === 0 ? "No brands available" : "No matching brands found"}
                       </motion.p>
                     ) : (
-                      <motion.div 
+                      <motion.div
                         className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ staggerChildren: 0.03 }}
                       >
                         {filteredBrands.map((brand, index) => (
-                          <motion.div 
-                            key={brand.brand} 
-                            className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200" 
+                          <motion.div
+                            key={brand.brand}
+                            className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200"
                             onClick={() => handleBrandSelect(brand)}
                             variants={cardVariants}
                             initial="hidden"
@@ -499,16 +775,16 @@ const Banner = () => {
                   className="w-full"
                 >
                   <div className="flex items-center mb-4">
-                    <button 
-                      onClick={handleBack} 
+                    <button
+                      onClick={handleBack}
                       className="mr-2 text-gray-500 hover:text-black transition-colors duration-200"
                     >
                       <BsArrowLeft size={20} />
                     </button>
                     <h2 className="text-lg sm:text-xl font-bold">Select Model</h2>
                   </div>
-                  
-                  <motion.div 
+
+                  <motion.div
                     className="relative mb-4"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -523,10 +799,10 @@ const Banner = () => {
                       className="w-full pl-10 border border-gray-300 rounded-lg px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                     />
                   </motion.div>
-                  
+
                   <div className="h-[400px] overflow-y-auto">
                     {filteredModels.length === 0 ? (
-                      <motion.p 
+                      <motion.p
                         className="text-center py-8 text-gray-500"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -535,7 +811,7 @@ const Banner = () => {
                         {selectedBrand?.models.length === 0 ? "No models available" : "No matching models found"}
                       </motion.p>
                     ) : (
-                      <motion.div 
+                      <motion.div
                         className="grid grid-cols-2 sm:grid-cols-3 gap-3"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -572,18 +848,18 @@ const Banner = () => {
                   className="w-full"
                 >
                   <div className="flex items-center mb-4">
-                    <button 
-                      onClick={handleBack} 
+                    <button
+                      onClick={handleBack}
                       className="mr-2 text-gray-500 hover:text-black transition-colors duration-200"
                     >
                       <BsArrowLeft size={20} />
                     </button>
                     <h2 className="text-lg sm:text-xl font-bold">Select Fuel Type</h2>
                   </div>
-                  
+
                   <div className="h-[400px] overflow-y-auto">
                     {selectedModel?.fuel_types?.length === 0 ? (
-                      <motion.p 
+                      <motion.p
                         className="text-center py-8 text-gray-500"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -592,16 +868,14 @@ const Banner = () => {
                         No fuel types available
                       </motion.p>
                     ) : (
-                      <motion.div 
+                      <motion.div
                         className="grid grid-cols-2 gap-3"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ staggerChildren: 0.03 }}
                       >
                         {selectedModel?.fuel_types?.map((fuel, index) => {
-                          const fuelIcon = fuelIcons.find(f => 
-                            f.type.toLowerCase() === fuel.toLowerCase()
-                          );
+                          const fuelIcon = fuelIcons.find((f) => f.type.toLowerCase() === fuel.toLowerCase());
                           return (
                             <motion.div
                               key={fuel}
@@ -634,18 +908,18 @@ const Banner = () => {
                   className="w-full"
                 >
                   <div className="flex items-center mb-4">
-                    <button 
-                      onClick={handleBack} 
+                    <button
+                      onClick={handleBack}
                       className="mr-2 text-gray-500 hover:text-black transition-colors duration-200"
                     >
                       <BsArrowLeft size={20} />
                     </button>
                     <h2 className="text-lg sm:text-xl font-bold">Select Manufacturing Year</h2>
                   </div>
-                  
+
                   <div className="h-[400px] overflow-y-auto">
                     {years.length === 0 ? (
-                      <motion.p 
+                      <motion.p
                         className="text-center py-8 text-gray-500"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -654,7 +928,7 @@ const Banner = () => {
                         No years available
                       </motion.p>
                     ) : (
-                      <motion.div 
+                      <motion.div
                         className="grid grid-cols-3 gap-3"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -664,11 +938,11 @@ const Banner = () => {
                           <button
                             key={year}
                             className={`p-3 border rounded-lg hover:border-blue-500 cursor-pointer text-center transition-colors duration-200 ${
-                              selectedYear === year ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                              selectedYear === year ? "border-blue-500 bg-blue-50" : "border-gray-200"
                             }`}
                             onClick={() => handleYearSelect(year)}
                           >
-                            <motion.p 
+                            <motion.p
                               className="font-medium text-sm sm:text-base"
                               initial={{ opacity: 0, y: 5 }}
                               animate={{ opacity: 1, y: 0 }}
