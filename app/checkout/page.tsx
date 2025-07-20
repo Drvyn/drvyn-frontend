@@ -85,7 +85,7 @@ const CheckoutPage = () => {
         year: carInfo.year || "",
         phone: carInfo.phone || "",
         date: selectedDate,
-        time: selectedTimeSlot, // Now using the time slot
+        time: selectedTimeSlot,
         address,
         alternatePhone,
         serviceCenter,
@@ -106,7 +106,6 @@ const CheckoutPage = () => {
         throw new Error(errorData.message || "Failed to submit booking");
       }
       
-      // Store booking details in sessionStorage for confirmation page
       sessionStorage.setItem("bookingDetails", JSON.stringify(bookingDetails));
       sessionStorage.removeItem("cart");
       router.push("/checkout/confirmation");
@@ -126,41 +125,79 @@ const CheckoutPage = () => {
     }
   };
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
+
+  const buttonVariants = {
+    hover: { scale: 1.02, boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)" },
+    tap: { scale: 0.98 }
+  };
+
+  const timeSlotVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    show: (i: number) => ({
+      opacity: 1,
+      scale: 1,
+      transition: { delay: i * 0.05 }
+    })
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/*Header*/}
-      <div className="bg-white p-6 border-b border-gray-200 shadow-sm">
+      {/* Header with animation */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white p-6 border-b border-gray-200 shadow-sm"
+      >
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center flex-col sm:flex-row">
-            <h1 className=" text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Complete Your Booking</h1>
+            <h1 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Complete Your Booking</h1>
             <div className="flex items-center space-x-2">
-              <FiShoppingBag className="text-blue-600 "/>
+              <FiShoppingBag className="text-blue-600"/>
               <span className="font-medium">
                 {cart.length} {cart.length === 1 ? 'item' : 'items'}
               </span>
             </div>
           </div>
         </div>
-      </div>
-    <div className="min-h-screen bg-gray-50">
+      </motion.div>
+
       <div className="max-w-7xl mx-auto px-4 py-6">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          initial="hidden"
+          animate="show"
+          variants={containerVariants}
           className="flex flex-col lg:flex-row gap-8"
         >
           {/* Left side - Checkout Details */}
           <div className="lg:w-[70%]">
             {/* Customer Information Section */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+            <motion.div 
+              variants={itemVariants}
+              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6"
+            >
               <h2 className="text-xl font-semibold mb-6 text-gray-800 flex items-center">
                 <FiPhone className="mr-2 text-blue-600"/> Customer Information
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Phone Number */}
-                <div>
+                <motion.div variants={itemVariants}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Registered Phone Number
                   </label>
@@ -175,11 +212,11 @@ const CheckoutPage = () => {
                       readOnly
                     />
                   </div>
-                </div>
+                </motion.div>
 
-                {/* Vehicle Model - Only shows if model exists */}
+                {/* Vehicle Model */}
                 {carInfo.model && (
-                  <div>
+                  <motion.div variants={itemVariants}>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Vehicle Model
                     </label>
@@ -189,18 +226,20 @@ const CheckoutPage = () => {
                       value={carInfo.model}
                       readOnly
                     />
-                  </div>
+                  </motion.div>
                 )}
               </div>
-            </div>
-
+            </motion.div>
 
             {/* Date and Time Selection */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+            <motion.div 
+              variants={itemVariants}
+              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6"
+            >
               <h2 className="text-xl flex items-center font-semibold mb-6 text-gray-800">
                 <FiCalendar className="mr-2 text-blue-600"/>Service Schedule</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                <motion.div variants={itemVariants}>
                   <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                     <FiCalendar className="mr-2 text-gray-500"/>Date *</label>
                   <input
@@ -211,13 +250,16 @@ const CheckoutPage = () => {
                     min={new Date().toISOString().split('T')[0]}
                     required
                   />
-                </div>
-                <div>
+                </motion.div>
+                <motion.div variants={itemVariants}>
                   <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                     <FiClock className="mr-2 text-gray-500"/>Time Slot *</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {timeSlots.map((slot) => (
-                      <button
+                  <motion.div 
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-2"
+                    variants={containerVariants}
+                  >
+                    {timeSlots.map((slot, i) => (
+                      <motion.button
                         key={slot}
                         type="button"
                         onClick={() => setSelectedTimeSlot(slot)}
@@ -226,92 +268,121 @@ const CheckoutPage = () => {
                             ? 'bg-blue-100 border-blue-500 text-blue-700'
                             : 'border-gray-300 hover:border-blue-300'
                         }`}
+                        variants={timeSlotVariants}
+                        custom={i}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         {slot}
-                      </button>
+                      </motion.button>
                     ))}
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
             
             {/* Address Selection */}
-            <div className="bg-white rounded-xl p-6 mb-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl flex font-semibold mb-6 text-gray-800 items-center"><FiMapPin className="mr-2 text-blue-600"/>Pickup Details</h2>
-              <div>
+            <motion.div 
+              variants={itemVariants}
+              className="bg-white rounded-xl p-6 mb-6 shadow-sm border border-gray-200"
+            >
+              <h2 className="text-xl flex font-semibold mb-6 text-gray-800 items-center">
+                <FiMapPin className="mr-2 text-blue-600"/>Pickup Details
+              </h2>
+              <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Address *</label>
-              <textarea
-                placeholder="Enter your complete address including landmarks"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                required
-              />
-            </div>
-            
-            {/* Alternate Phone number */}
-            <div className="mb-6">
-              <h2 className="block text-sm font-medium mb-2 text-gray-700">Alternate Phone Number (Optional)</h2>
-              <input
-                type="tel"
-                maxLength={10}
-                placeholder="Enter 10-digit alternate number"
-                className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                value={alternatePhone}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  setAlternatePhone(value);
-                }}
-              />
-            </div>
+                <textarea
+                  placeholder="Enter your complete address including landmarks"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                />
+              </motion.div>
+              
+              {/* Alternate Phone number */}
+              <motion.div variants={itemVariants} className="mb-6">
+                <h2 className="block text-sm font-medium mb-2 text-gray-700">Alternate Phone Number (Optional)</h2>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  placeholder="Enter 10-digit alternate number"
+                  className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                  value={alternatePhone}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setAlternatePhone(value);
+                  }}
+                />
+              </motion.div>
 
-            {/* Service Centre */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Service Center</label>
-              <select 
-                className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                value={serviceCenter}
-                onChange={(e) => setServiceCenter(e.target.value)}
-              >
-                <option value="COIMBATORE">Coimbatore Service Center</option>
-                <option value="CHENNAI" disabled>(Coming Soon)</option>
-              </select>
-            </div>
+              {/* Service Centre */}
+              <motion.div variants={itemVariants}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Service Center</label>
+                <select 
+                  className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                  value={serviceCenter}
+                  onChange={(e) => setServiceCenter(e.target.value)}
+                >
+                  <option value="COIMBATORE">Coimbatore Service Center</option>
+                  <option value="CHENNAI" disabled>(Coming Soon)</option>
+                </select>
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
 
           {/* Right side - Order Summary */}
           <div className="lg:w-[30%]">
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 sticky top-8">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800 border-r">Order Summary</h2>
+            <motion.div 
+              variants={itemVariants}
+              className="bg-white p-6 rounded-xl shadow-md border border-gray-200 sticky top-8"
+            >
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 border-r">Order Summary</h2>
 
-            {cart.length > 0 ? (
-              <ul className="space-y-4 mb-6">
-                {cart.map((item, index) => (
-                  <li key={index} className="flex justify-between text-sm text-gray-700">
-                    <div className="flex items-center">
-                     <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded mr-3">{item.quantity}</span>
-                    <span className="text-sm">{item.packageName}</span>
-                    </div>
-                    <div className="font-semibold">₹{item.price * item.quantity}</div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="mb-6 text-center py-8">
+              {cart.length > 0 ? (
+                <motion.ul 
+                  variants={containerVariants}
+                  className="space-y-4 mb-6"
+                >
+                  {cart.map((item, index) => (
+                    <motion.li 
+                      key={index} 
+                      variants={itemVariants}
+                      className="flex justify-between text-sm text-gray-700"
+                    >
+                      <div className="flex items-center">
+                       <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded mr-3">{item.quantity}</span>
+                      <span className="text-sm">{item.packageName}</span>
+                      </div>
+                      <div className="font-semibold">₹{item.price * item.quantity}</div>
+                    </motion.li>
+                  ))}
+                </motion.ul>
+              ) : (
+                <motion.div 
+                  variants={itemVariants}
+                  className="mb-6 text-center py-8"
+                >
                   <FiShoppingBag className="mx-auto text-gray-400 text-3xl mb-2" />
                   <p className="text-gray-500">Your cart is empty</p>
-                </div>
-            )}
+                </motion.div>
+              )}
 
-            <div className="border-t border-gray-200 pt-4 mb-6">
-              <div className="flex justify-between text-gray-800 items-center text-lg font-semibold">
-                <span>Total Amount:</span>
-                <span>₹{totalPrice}</span>
-              </div>
-            </div> 
-                <button
+              <motion.div 
+                variants={itemVariants}
+                className="border-t border-gray-200 pt-4 mb-6"
+              >
+                <div className="flex justify-between text-gray-800 items-center text-lg font-semibold">
+                  <span>Total Amount:</span>
+                  <span>₹{totalPrice}</span>
+                </div>
+              </motion.div> 
+              
+              <motion.button
                 onClick={handlePlaceOrder}
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
                 className={`w-full bg-blue-600 text-white py-4 rounded-lg hover:bg-blue-700 transition-all duration-200 ${
                   isSubmitting ? "opacity-70 cursor-not-allowed" : ""
                 } ${cart.length === 0 ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed" : ""}`}
@@ -326,20 +397,22 @@ const CheckoutPage = () => {
                     Processing...
                   </span>
                 ) : "Confirm & Place Order"}
-              </button>
+              </motion.button>
 
-              <div className="mt-4 text-xs text-gray-500 text-center">
+              <motion.div 
+                variants={itemVariants}
+                className="mt-4 text-xs text-gray-500 text-center"
+              >
                  <p>By placing your order, you agree to our</p>
                 <p>
                   <a href="#" className="text-blue-600 hover:underline">Terms of Service</a> and{' '}
                   <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
                 </p>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </motion.div>
       </div>
-    </div>
     </div>
   );
 };
