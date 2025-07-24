@@ -30,6 +30,7 @@ type CartItem = {
   packageName: string;
   price: number;
   quantity: number;
+  fuelType?: string;
 };
 
 const ServicePage = () => {
@@ -77,16 +78,21 @@ const ServicePage = () => {
 
   useEffect(() => {
     const data = sessionStorage.getItem('carFormData');
-    if (data) setCarInfo(JSON.parse(data));
-    fetchServicePackages(activeCategory);
+    if (data) {
+      const carData = JSON.parse(data);
+      setCarInfo(carData);
+      fetchServicePackages(activeCategory, carData.fuelType || "Petrol");
+    } else {
+      fetchServicePackages(activeCategory, "Petrol");
+    }
   }, [activeCategory]);
 
-  const fetchServicePackages = async (category: string) => {
+  const fetchServicePackages = async (category: string, fuelType: string) => {
     try {
       setLoading(true);
       const encodedCategory = encodeURIComponent(category);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service-packages?category=${encodedCategory}`
+        `${process.env.NEXT_PUBLIC_API_URL}/service-packages?category=${encodedCategory}&fuel_type=${fuelType}`
       );
       
       if (!response.ok) throw new Error('Failed to fetch service packages');
@@ -95,7 +101,9 @@ const ServicePage = () => {
       
       const formattedPackages = data.map((pkg: ServicePackage) => ({
         ...pkg,
-        services: Array.isArray(pkg.services) ? pkg.services : []
+        services: Array.isArray(pkg.services) ? pkg.services : [],
+        price: pkg.price || 0,
+        discountedPrice: pkg.discountedPrice || pkg.price || 0
       }));
       
       setPackages(formattedPackages);
@@ -114,6 +122,7 @@ const ServicePage = () => {
   const handleCategoryClick = (category: string) => {
     if (activeCategory !== category) {
       setActiveCategory(category);
+      fetchServicePackages(category, carInfo.fuelType || "Petrol");
     }
   };
 
@@ -133,28 +142,43 @@ const ServicePage = () => {
 
   const addToCart = (pkg: ServicePackage) => {
     setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.packageName === pkg.name);
+      const existingItem = prevCart.find(
+        item => item.packageName === pkg.name && item.fuelType === carInfo.fuelType
+      );
+      
       if (existingItem) {
         return prevCart.map(item =>
-          item.packageName === pkg.name
+          item.packageName === pkg.name && item.fuelType === carInfo.fuelType
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
-        return [...prevCart, { packageName: pkg.name, price: pkg.discountedPrice, quantity: 1 }];
+        return [
+          ...prevCart, 
+          { 
+            packageName: pkg.name, 
+            price: pkg.discountedPrice, 
+            quantity: 1,
+            fuelType: carInfo.fuelType || "Petrol"
+          }
+        ];
       }
     });
   };
 
   const removeFromCart = (packageName: string) => {
-    setCart(prevCart => prevCart.filter(item => item.packageName !== packageName));
+    setCart(prevCart => 
+      prevCart.filter(item => 
+        !(item.packageName === packageName && item.fuelType === carInfo.fuelType)
+      )
+    );
   };
 
   const updateQuantity = (packageName: string, newQuantity: number) => {
     if (newQuantity < 1) return;
     setCart(prevCart =>
       prevCart.map(item =>
-        item.packageName === packageName
+        item.packageName === packageName && item.fuelType === carInfo.fuelType
           ? { ...item, quantity: newQuantity }
           : item
       )
@@ -173,6 +197,26 @@ const ServicePage = () => {
   const visiblePackages = expandedPackages[activeCategory] 
     ? packages 
     : packages.slice(0, 4);
+
+  const Counter = ({ value, duration = 1 }: { value: number; duration?: number }) => {
+    const count = useMotionValue(0);
+    const rounded = useTransform(count, (latest) => Math.round(latest).toLocaleString());
+
+    useEffect(() => {
+      const controls = animate(count, value, {
+        duration: duration,
+        ease: "easeOut",
+      });
+      return controls.stop;
+    }, [value]);
+
+    return <motion.span>{rounded}</motion.span>;
+  };
+
+  const proceedToCheckout = () => {
+    sessionStorage.setItem('cart', JSON.stringify(cart));
+    window.location.href = '/checkout';
+  };
 
   if (loading && packages.length === 0) {
     return (
@@ -207,32 +251,12 @@ const ServicePage = () => {
     );
   }
 
-  const proceedToCheckout = () => {
-    sessionStorage.setItem('cart', JSON.stringify(cart));
-    window.location.href = '/checkout';
-  };
-
-  const Counter = ({ value, duration = 1 }: { value: number; duration?: number }) => {
-    const count = useMotionValue(0);
-    const rounded = useTransform(count, (latest) => Math.round(latest).toLocaleString());
-
-    useEffect(() => {
-      const controls = animate(count, value, {
-        duration: duration,
-        ease: "easeOut",
-      });
-      return controls.stop;
-    }, [value]);
-
-    return <motion.span>{rounded}</motion.span>;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Navbar />
       
       {/* Main Layout */}
-      <div className="max-w-7xl mx-auto  py-6">
+      <div className="max-w-7xl mx-auto py-6">
         {/* Mobile Horizontal Scrollable Categories */}
         <div className="lg:hidden bg-white py-4 shadow-sm mb-5">
           <div className="relative">
@@ -310,9 +334,16 @@ const ServicePage = () => {
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-800">{activeCategory}</h2>
-                  <div className="bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                    <Shield className="w-4 h-4 mr-1" />
-                    {packages.length} Packages
+                  <div className="flex items-center gap-2">
+                    <div className="bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-sm font-medium flex items-center">
+                      <Shield className="w-4 h-4 mr-1" />
+                      {packages.length} Packages
+                    </div>
+                    {carInfo.fuelType && (
+                      <div className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium flex items-center">
+                        ⛽ {carInfo.fuelType}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
@@ -428,7 +459,9 @@ const ServicePage = () => {
                             <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
                               <div className="flex items-center gap-3">
                                 <span className="text-gray-500 line-through">Rs. {pkg.price}</span>
-                                <span className="text-lg font-bold text-gray-800">Rs. {pkg.discountedPrice}</span>
+                                <span className="text-lg font-bold text-gray-800">
+                                  Rs. {pkg.discountedPrice}
+                                </span>
                               </div>
                               <motion.button 
                                 onClick={() => addToCart(pkg)}
@@ -518,57 +551,70 @@ const ServicePage = () => {
                   <div>
                     <LayoutGroup>
                       <div className="space-y-4 mb-4 max-h-80 overflow-y-auto">
-                        {cart.map((item, index) => (
-                          <motion.div
-                            key={index}
-                            layout
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            className="flex justify-between items-center border-b border-gray-200 pb-3"
-                          >
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-800">{item.packageName}</p>
-                              <div className="flex items-center gap-2 mt-2">
+                        {cart
+                          .filter(item => item.fuelType === carInfo.fuelType)
+                          .map((item, index) => (
+                            <motion.div
+                              key={index}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, x: -10 }}
+                              className="flex justify-between items-center border-b border-gray-200 pb-3"
+                            >
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-800">{item.packageName}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <button 
+                                    onClick={() => updateQuantity(item.packageName, item.quantity - 1)}
+                                    className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-md text-gray-500 hover:bg-gray-100 transition-colors duration-200"
+                                  >
+                                    -
+                                  </button>
+                                  <span className="w-8 text-center font-medium">{item.quantity}</span>
+                                  <button 
+                                    onClick={() => updateQuantity(item.packageName, item.quantity + 1)}
+                                    className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-md text-gray-500 hover:bg-gray-100 transition-colors duration-200"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <p className="font-medium text-gray-800">Rs. {item.price * item.quantity}</p>
                                 <button 
-                                  onClick={() => updateQuantity(item.packageName, item.quantity - 1)}
-                                  className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-md text-gray-500 hover:bg-gray-100 transition-colors duration-200"
+                                  onClick={() => removeFromCart(item.packageName)}
+                                  className="text-red-500 hover:text-red-700 transition-colors duration-200"
                                 >
-                                  -
-                                </button>
-                                <span className="w-8 text-center font-medium">{item.quantity}</span>
-                                <button 
-                                  onClick={() => updateQuantity(item.packageName, item.quantity + 1)}
-                                  className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-md text-gray-500 hover:bg-gray-100 transition-colors duration-200"
-                                >
-                                  +
+                                  <Trash2 className="w-5 h-5" />
                                 </button>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <p className="font-medium text-gray-800">Rs. {item.price * item.quantity}</p>
-                              <button 
-                                onClick={() => removeFromCart(item.packageName)}
-                                className="text-red-500 hover:text-red-700 transition-colors duration-200"
-                              >
-                                <Trash2 className="w-5 h-5" />
-                              </button>
-                            </div>
-                          </motion.div>
-                        ))}
+                            </motion.div>
+                          ))
+                        }
                       </div>
                     </LayoutGroup>
                     <div className="border-t border-gray-200 pt-4">
                       <div className="flex justify-between font-semibold text-lg mb-2">
                         <span>Subtotal:</span>
                         <span className="flex">
-                          Rs. <Counter value={cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)} duration={0.8} />
+                          Rs. <Counter 
+                            value={cart
+                              .filter(item => item.fuelType === carInfo.fuelType)
+                              .reduce((sum, item) => sum + (item.price * item.quantity), 0)} 
+                            duration={0.8} 
+                          />
                         </span>
                       </div>
                       <div className="flex justify-between font-semibold text-lg border-t border-gray-200 pt-3">
                         <span>Total:</span>
                         <span className="flex">
-                          Rs. <Counter value={cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)} duration={0.8} />
+                          Rs. <Counter 
+                            value={cart
+                              .filter(item => item.fuelType === carInfo.fuelType)
+                              .reduce((sum, item) => sum + (item.price * item.quantity), 0)} 
+                            duration={0.8} 
+                          />
                         </span>
                       </div>
                       <button
