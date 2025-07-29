@@ -43,16 +43,14 @@ const Banner = () => {
   const [transitionDirection, setTransitionDirection] = useState<Direction>("forward");
   const [viewHeight, setViewHeight] = useState("auto");
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [isTestingNumber, setIsTestingNumber] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false); 
-  const TESTING_NUMBER = process.env.NEXT_PUBLIC_TESTING_NUMBER; 
-  
+
   const {
     phone,
     setPhone,
     otp,
     setOtp,
     otpSent,
+    otpVerified,
     isSendingOtp,
     otpError,
     resendTimer,
@@ -177,17 +175,6 @@ const Banner = () => {
     }
   }, [currentView]);
 
-  // Check if entered phone number is the testing number
-  useEffect(() => {
-    if (phone === TESTING_NUMBER) {
-      setIsTestingNumber(true);
-      setOtpVerified(true); // Auto-verify for testing number
-    } else {
-      setIsTestingNumber(false);
-      setOtpVerified(false); // Reset verification if number changes
-    }
-  }, [phone]);
-
   const filteredBrands = brands.filter((brand) =>
     brand.brand.toLowerCase().includes(brandSearch.toLowerCase())
   );
@@ -240,7 +227,7 @@ const Banner = () => {
       return;
     }
 
-    if (!isTestingNumber && !otpVerified) {
+    if (!otpVerified) {
       setError("Please verify your phone number with OTP");
       return;
     }
@@ -255,7 +242,6 @@ const Banner = () => {
           year: selectedYear,
           phone: `+91${phone}`,
           image: selectedModel.imageUrl,
-          isTesting: isTestingNumber,
         })
       );
 
@@ -268,7 +254,6 @@ const Banner = () => {
           fuelType: selectedFuel,
           year: selectedYear,
           phone: `+91${phone}`,
-          isTesting: isTestingNumber,
         }),
       });
 
@@ -434,11 +419,11 @@ const Banner = () => {
                             placeholder="ENTER MOBILE NUMBER"
                             className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:shadow-[inset_0_0_0_2px_rgb(59,130,246)] text-sm sm:text-base transition-colors duration-200"
                             required
-                            disabled={otpVerified || isTestingNumber}
+                            disabled={otpVerified}
                           />
                         </div>
                         <div className="w-[30%] sm:w-auto">
-                          {!otpVerified && !isTestingNumber && (
+                          {!otpVerified && (
                             <button
                               type="button"
                               onClick={handleSendOtp}
@@ -461,17 +446,7 @@ const Banner = () => {
                         </div>
                       </div>
                     </motion.div>
-                    {isTestingNumber && (
-                      <motion.div
-                        className="mb-4 p-2 bg-yellow-100 text-yellow-700 rounded text-center text-sm"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        Using testing number - OTP verification skipped
-                      </motion.div>
-                    )}
-                    {otpSent && !otpVerified && !isTestingNumber && (
+                    {otpSent && !otpVerified && (
                       <motion.div
                         className="mb-4"
                         initial={{ opacity: 0, height: 0 }}
