@@ -43,10 +43,10 @@ const Banner = () => {
   const [transitionDirection, setTransitionDirection] = useState<Direction>("forward");
   const [viewHeight, setViewHeight] = useState("auto");
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const TESTING_NUMBER = "9999999999"; // Change this to your preferred testing number
   const [isTestingNumber, setIsTestingNumber] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false); // Local state for OTP verification
-
+  const [otpVerified, setOtpVerified] = useState(false); 
+  const TESTING_NUMBER = process.env.NEXT_PUBLIC_TESTING_NUMBER; 
+  
   const {
     phone,
     setPhone,
