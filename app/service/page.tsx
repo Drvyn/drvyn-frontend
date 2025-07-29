@@ -78,41 +78,60 @@ const ServicePage = () => {
 
   useEffect(() => {
     const data = sessionStorage.getItem('carFormData');
+    console.log('Retrieved carFormData from sessionStorage:', data); // Debug log
     if (data) {
       const carData = JSON.parse(data);
       setCarInfo(carData);
-      fetchServicePackages(activeCategory, carData.fuelType || "Petrol");
+      fetchServicePackages(activeCategory, carData);
     } else {
-      fetchServicePackages(activeCategory, "Petrol");
+      console.warn('No carFormData found, using default values');
+      setCarInfo({ fuelType: "Petrol", brand: "Maruti", model: "Swift" }); // Fallback for testing
+      fetchServicePackages(activeCategory, { fuelType: "Petrol", brand: "Maruti", model: "Swift" });
     }
   }, [activeCategory]);
 
-  const fetchServicePackages = async (category: string, fuelType: string) => {
+  const fetchServicePackages = async (category: string, carData: CarInfo) => {
     try {
       setLoading(true);
+      setError(null);
       const encodedCategory = encodeURIComponent(category);
+      const queryParams = new URLSearchParams({
+        category: encodedCategory,
+        fuel_type: carData.fuelType || "Petrol",
+        brand: carData.brand || "",
+        model: carData.model || "",
+      }).toString();
+
+      console.log('Fetching service packages with URL:', `${process.env.NEXT_PUBLIC_API_URL}/service-packages?${queryParams}`); // Debug log
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service-packages?category=${encodedCategory}&fuel_type=${fuelType}`
+        `${process.env.NEXT_PUBLIC_API_URL}/service-packages?${queryParams}`,
+        { headers: { 'Content-Type': 'application/json' } }
       );
       
-      if (!response.ok) throw new Error('Failed to fetch service packages');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+      }
       
       const data = await response.json();
+      console.log('Received service packages:', data); // Debug log
       
       const formattedPackages = data.map((pkg: ServicePackage) => ({
         ...pkg,
         services: Array.isArray(pkg.services) ? pkg.services : [],
-        price: pkg.price || 0,
-        discountedPrice: pkg.discountedPrice || pkg.price || 0
+        price: Number(pkg.price) || 0,
+        discountedPrice: Number(pkg.discountedPrice) || Number(pkg.price) || 0,
       }));
       
       setPackages(formattedPackages);
       setExpandedPackages(prev => ({ ...prev, [category]: false }));
     } catch (err) {
+      console.error('Error fetching service packages:', err); // Debug log
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An unknown error occurred');
+        setError('An unknown error occurred while fetching services');
       }
     } finally {
       setLoading(false);
@@ -122,7 +141,7 @@ const ServicePage = () => {
   const handleCategoryClick = (category: string) => {
     if (activeCategory !== category) {
       setActiveCategory(category);
-      fetchServicePackages(category, carInfo.fuelType || "Petrol");
+      fetchServicePackages(category, carInfo);
     }
   };
 
@@ -224,28 +243,6 @@ const ServicePage = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           <p className="text-gray-600 font-medium">Loading service packages...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md text-center">
-          <div className="text-red-500 bg-red-50 p-3 rounded-full inline-flex mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Error loading services</h3>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
-          >
-            Try Again
-          </button>
         </div>
       </div>
     );
@@ -374,6 +371,52 @@ const ServicePage = () => {
                           </div>
                         </div>
                       ))}
+                    </motion.div>
+                  ) : error ? (
+                    <motion.div
+                      key="error"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto text-center"
+                    >
+                      <div className="text-red-500 bg-red-50 p-3 rounded-full inline-flex mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">Error loading services</h3>
+                      <p className="text-gray-600 mb-6">{error}</p>
+                      <button 
+                        onClick={() => fetchServicePackages(activeCategory, carInfo)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                      >
+                        Retry
+                      </button>
+                    </motion.div>
+                  ) : packages.length === 0 ? (
+                    <motion.div
+                      key="no-packages"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto text-center"
+                    >
+                      <div className="text-gray-500 bg-gray-50 p-3 rounded-full inline-flex mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">No services available</h3>
+                      <p className="text-gray-600 mb-6">
+                        No services found for {carInfo.brand || 'selected brand'} {carInfo.model || 'model'} ({carInfo.fuelType || 'fuel type'}). Try another category or vehicle.
+                      </p>
+                      <button 
+                        onClick={() => fetchServicePackages(activeCategory, carInfo)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                      >
+                        Refresh
+                      </button>
                     </motion.div>
                   ) : (
                     <motion.div
