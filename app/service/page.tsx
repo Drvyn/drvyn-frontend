@@ -24,6 +24,7 @@ type ServicePackage = {
   duration: string;
   recommended?: boolean;
   category?: string;
+  Extra?: string;
 };
 
 type CartItem = {
@@ -31,6 +32,7 @@ type CartItem = {
   price: number;
   quantity: number;
   fuelType?: string;
+  Extra?: string;
 };
 
 const ServicePage = () => {
@@ -446,6 +448,10 @@ const ServicePage = () => {
                           <div className="p-5">
                             <h3 className="text-lg font-semibold text-gray-800 mb-3">{pkg.name}</h3>
                             <div className="flex flex-wrap gap-2 mb-4">
+                                                                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
+                                <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
+                                {pkg.Extra}
+                              </span>
                               <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
                                 <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
                                 {pkg.warranty}
