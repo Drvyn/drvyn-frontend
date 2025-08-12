@@ -25,6 +25,8 @@ type ServicePackage = {
   recommended?: boolean;
   category?: string;
   Extra?: string;
+  Extra1?: string;
+  
 };
 
 type CartItem = {
@@ -33,6 +35,7 @@ type CartItem = {
   quantity: number;
   fuelType?: string;
   Extra?: string;
+  Extra1?: string;
 };
 
 const ServicePage = () => {
@@ -50,32 +53,34 @@ const ServicePage = () => {
     "Periodic Car Services",
     "AC Service & Repair",
     "Denting & Painting",
-    "Batteries",
-    "Tyres & Wheel Care",
+    // "Batteries",
+    // "Tyres & Wheel Care",
     "Detailing Services",
-    "Car Spa & Cleaning",
+    // "Car Spa & Cleaning",
     "Car Inspections",
-    "Windshields & Lights",
-    "Suspension & Fitments",
-    "Clutch & Body Parts",
+    // "Windshields & Lights",
+    // "Suspension & Fitments",
+    // "Clutch & Body Parts",
     "Insurance Claims",
-    "SOS Service",
+    // "SOS Service",
+    "Car Wash"
   ];
 
   const serviceImages: Record<string, string> = {
     "Periodic Car Services": "serviceCategories/PeriodicCarServices.png",
     "AC Service & Repair": "serviceCategories/ACService&Repair.png",
     "Denting & Painting": "serviceCategories/Denting&Painting.png",
-    "Batteries": "serviceCategories/Batteries.png",
-    "Tyres & Wheel Care": "serviceCategories/Tyres&WheelCare.png",
+    // "Batteries": "serviceCategories/Batteries.png",
+    // "Tyres & Wheel Care": "serviceCategories/Tyres&WheelCare.png",
     "Detailing Services": "serviceCategories/DetailingServices.png",
-    "Car Spa & Cleaning": "serviceCategories/CarSpa&Cleaning.png",
-    "Car Inspections": "serviceCategories/CarInspections.png",
-    "Windshields & Lights": "serviceCategories/Windshields&Lights.png",
-    "Suspension & Fitments": "serviceCategories/Suspension&Fitments.png",
-    "Clutch & Body Parts": "serviceCategories/Clutch&BodyParts.png",
+    // "Car Spa & Cleaning": "serviceCategories/CarSpa&Cleaning.png",
+     "Car Inspections": "serviceCategories/CarInspections.png",
+    // "Windshields & Lights": "serviceCategories/Windshields&Lights.png",
+    // "Suspension & Fitments": "serviceCategories/Suspension&Fitments.png",
+    // "Clutch & Body Parts": "serviceCategories/Clutch&BodyParts.png",
     "Insurance Claims": "serviceCategories/InsuranceClaims.png",
-    "SOS Service": "serviceCategories/SOSService.png",
+    // "SOS Service": "serviceCategories/SOSService.png",
+    "Car Wash":"serviceCategories/SOSService.png",
   };
 
   useEffect(() => {
@@ -180,7 +185,9 @@ const ServicePage = () => {
             packageName: pkg.name, 
             price: pkg.discountedPrice, 
             quantity: 1,
-            fuelType: carInfo.fuelType || "Petrol"
+            fuelType: carInfo.fuelType || "Petrol",
+            Extra: pkg.Extra,
+            Extra1: pkg.Extra1
           }
         ];
       }
@@ -447,24 +454,38 @@ const ServicePage = () => {
                           )}
                           <div className="p-5">
                             <h3 className="text-lg font-semibold text-gray-800 mb-3">{pkg.name}</h3>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                                                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {pkg.Extra && (
+                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
                                 <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
                                 {pkg.Extra}
                               </span>
+                            )}
+                            {pkg.Extra1 && (
                               <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
                                 <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
-                                {pkg.warranty}
+                                {pkg.Extra1}
                               </span>
+                            )}
+                            {pkg.interval && (
                               <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
                                 <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
                                 {pkg.interval}
                               </span>
+                            )}
+                            {pkg.warranty && (
+                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
+                                <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
+                                {pkg.warranty}
+                              </span>
+                            )}
+                            {pkg.duration && (
                               <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
                                 <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
                                 {pkg.duration}
                               </span>
-                            </div>
+                            )}
+                          </div>
                             <ul className="space-y-2 mb-4">
                               {pkg.services.slice(0, 4).map((service, i) => (
                                 <motion.li
