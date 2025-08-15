@@ -26,7 +26,6 @@ type ServicePackage = {
   category?: string;
   Extra?: string;
   Extra1?: string;
-  
 };
 
 type CartItem = {
@@ -47,22 +46,16 @@ const ServicePage = () => {
   const [expandedPackages, setExpandedPackages] = useState<Record<string, boolean>>({});
   const [expandedServices, setExpandedServices] = useState<Record<string, boolean>>({});
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const serviceCategories = [
     "Periodic Car Services",
     "AC Service & Repair",
     "Denting & Painting",
-    // "Batteries",
-    // "Tyres & Wheel Care",
     "Detailing Services",
-    // "Car Spa & Cleaning",
     "Car Inspections",
-    // "Windshields & Lights",
-    // "Suspension & Fitments",
-    // "Clutch & Body Parts",
     "Insurance Claims",
-    // "SOS Service",
     "Car Wash"
   ];
 
@@ -70,29 +63,20 @@ const ServicePage = () => {
     "Periodic Car Services": "serviceCategories/PeriodicCarServices.png",
     "AC Service & Repair": "serviceCategories/ACService&Repair.png",
     "Denting & Painting": "serviceCategories/Denting&Painting.png",
-    // "Batteries": "serviceCategories/Batteries.png",
-    // "Tyres & Wheel Care": "serviceCategories/Tyres&WheelCare.png",
     "Detailing Services": "serviceCategories/DetailingServices.png",
-    // "Car Spa & Cleaning": "serviceCategories/CarSpa&Cleaning.png",
-     "Car Inspections": "serviceCategories/CarInspections.png",
-    // "Windshields & Lights": "serviceCategories/Windshields&Lights.png",
-    // "Suspension & Fitments": "serviceCategories/Suspension&Fitments.png",
-    // "Clutch & Body Parts": "serviceCategories/Clutch&BodyParts.png",
+    "Car Inspections": "serviceCategories/CarInspections.png",
     "Insurance Claims": "serviceCategories/InsuranceClaims.png",
-    // "SOS Service": "serviceCategories/SOSService.png",
-    "Car Wash":"serviceCategories/SOSService.png",
+    "Car Wash": "serviceCategories/SOSService.png",
   };
 
   useEffect(() => {
     const data = sessionStorage.getItem('carFormData');
-    console.log('Retrieved carFormData from sessionStorage:', data); // Debug log
     if (data) {
       const carData = JSON.parse(data);
       setCarInfo(carData);
       fetchServicePackages(activeCategory, carData);
     } else {
-      console.warn('No carFormData found, using default values');
-      setCarInfo({ fuelType: "Petrol", brand: "Maruti", model: "Swift" }); // Fallback for testing
+      setCarInfo({ fuelType: "Petrol", brand: "Maruti", model: "Swift" });
       fetchServicePackages(activeCategory, { fuelType: "Petrol", brand: "Maruti", model: "Swift" });
     }
   }, [activeCategory]);
@@ -109,8 +93,6 @@ const ServicePage = () => {
         model: carData.model || "",
       }).toString();
 
-      console.log('Fetching service packages with URL:', `${process.env.NEXT_PUBLIC_API_URL}/service-packages?${queryParams}`); // Debug log
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/service-packages?${queryParams}`,
         { headers: { 'Content-Type': 'application/json' } }
@@ -122,8 +104,6 @@ const ServicePage = () => {
       }
       
       const data = await response.json();
-      console.log('Received service packages:', data); // Debug log
-      
       const formattedPackages = data.map((pkg: ServicePackage) => ({
         ...pkg,
         services: Array.isArray(pkg.services) ? pkg.services : [],
@@ -134,7 +114,7 @@ const ServicePage = () => {
       setPackages(formattedPackages);
       setExpandedPackages(prev => ({ ...prev, [category]: false }));
     } catch (err) {
-      console.error('Error fetching service packages:', err); // Debug log
+      console.error('Error fetching service packages:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -166,7 +146,10 @@ const ServicePage = () => {
     }));
   };
 
-  const addToCart = (pkg: ServicePackage) => {
+  const addToCart = async (pkg: ServicePackage) => {
+    setAddingToCart(pkg.name);
+    await new Promise(resolve => setTimeout(resolve, 500)); // Animation duration
+    
     setCart(prevCart => {
       const existingItem = prevCart.find(
         item => item.packageName === pkg.name && item.fuelType === carInfo.fuelType
@@ -192,6 +175,8 @@ const ServicePage = () => {
         ];
       }
     });
+    
+    setAddingToCart(null);
   };
 
   const removeFromCart = (packageName: string) => {
@@ -261,7 +246,6 @@ const ServicePage = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Navbar />
       
-      {/* Main Layout */}
       <div className="max-w-7xl mx-auto py-6">
         {/* Mobile Horizontal Scrollable Categories */}
         <div className="lg:hidden bg-white py-4 shadow-sm mb-5">
@@ -454,38 +438,38 @@ const ServicePage = () => {
                           )}
                           <div className="p-5">
                             <h3 className="text-lg font-semibold text-gray-800 mb-3">{pkg.name}</h3>
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {pkg.Extra && (
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
-                                <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
-                                {pkg.Extra}
-                              </span>
-                            )}
-                            {pkg.Extra1 && (
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
-                                <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
-                                {pkg.Extra1}
-                              </span>
-                            )}
-                            {pkg.interval && (
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
-                                <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
-                                {pkg.interval}
-                              </span>
-                            )}
-                            {pkg.warranty && (
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
-                                <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
-                                {pkg.warranty}
-                              </span>
-                            )}
-                            {pkg.duration && (
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
-                                <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
-                                {pkg.duration}
-                              </span>
-                            )}
-                          </div>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {pkg.Extra && (
+                                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
+                                  <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
+                                  {pkg.Extra}
+                                </span>
+                              )}
+                              {pkg.Extra1 && (
+                                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
+                                  <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
+                                  {pkg.Extra1}
+                                </span>
+                              )}
+                              {pkg.interval && (
+                                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
+                                  <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
+                                  {pkg.interval}
+                                </span>
+                              )}
+                              {pkg.warranty && (
+                                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
+                                  <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
+                                  {pkg.warranty}
+                                </span>
+                              )}
+                              {pkg.duration && (
+                                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-sm flex items-center">
+                                  <Circle size={7} fill="#a0a0a0" stroke="none" className="mr-1" />
+                                  {pkg.duration}
+                                </span>
+                              )}
+                            </div>
                             <ul className="space-y-2 mb-4">
                               {pkg.services.slice(0, 4).map((service, i) => (
                                 <motion.li
@@ -535,10 +519,43 @@ const ServicePage = () => {
                               </div>
                               <motion.button 
                                 onClick={() => addToCart(pkg)}
-                                whileTap={{ scale: 0.95 }}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-medium cursor-pointer"
+                                whileTap={{ 
+                                  scale: addingToCart === pkg.name ? 0.92 : 1,
+                                  backgroundColor: addingToCart === pkg.name ? "#1e40af" : "#2563eb",
+                                }}
+                                whileHover={{
+                                  scale: addingToCart === pkg.name ? 1 : 1.02,
+                                  transition: { duration: 0.1 }
+                                }}
+                                className={`bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-medium cursor-pointer relative overflow-hidden ${
+                                  addingToCart === pkg.name ? 'pointer-events-none' : ''
+                                }`}
+                                disabled={addingToCart === pkg.name}
                               >
-                                Add to Cart
+                                {addingToCart === pkg.name ? (
+                                  <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex items-center justify-center gap-2"
+                                  >
+                                    <motion.div
+                                      animate={{ rotate: 360 }}
+                                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                                    />
+                                    Adding...
+                                  </motion.span>
+                                ) : (
+                                  <motion.span
+                                    key={`add-${pkg.name}`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="block"
+                                  >
+                                    Add to Cart
+                                  </motion.span>
+                                )}
                               </motion.button>
                             </div>
                           </div>
@@ -703,6 +720,6 @@ const ServicePage = () => {
       </div>
     </div>
   );
-}; 
+};
 
 export default ServicePage;
