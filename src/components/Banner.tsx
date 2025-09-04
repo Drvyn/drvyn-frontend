@@ -269,7 +269,7 @@ const Banner = () => {
     <div className={`w-16 h-16 flex items-center justify-center ${className}`}>
       <Image
         src={`${process.env.NEXT_PUBLIC_API_URL}${url}`}
-        alt={alt}
+        alt={`${alt} - Car service in Coimbatore`}
         width={124}
         height={124}
         className="max-w-full max-h-full object-contain"
@@ -350,7 +350,7 @@ const Banner = () => {
                   exit="exit"
                 >
                   <form onSubmit={handleSubmit} className="w-full">
-                    <motion.h2
+                    <motion.h1
                       className="text-2xl sm:text-3xl font-extrabold mb-4 text-black leading-tight"
                       variants={formItemVariants}
                       initial="hidden"
@@ -358,7 +358,7 @@ const Banner = () => {
                       custom={0}
                     >
                       Experience Premier Car Services In Coimbatore
-                    </motion.h2>
+                    </motion.h1>
                     <motion.p
                       className="mb-6 text-gray-600 text-base sm:text-lg"
                       variants={formItemVariants}
@@ -808,7 +808,24 @@ const Banner = () => {
         </div>
       </div>
       <SocialMedia />
+      <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://drvyn.in",
+          "@type": "AutoRepair",
+          "name": "Drvyn",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Coimbatore",
+            "addressCountry": "IN"
+          },
+          "description": "Premier car services in Coimbatore"
+        })
+      }}
+    />
     </section>
+    
   );
 };
 
