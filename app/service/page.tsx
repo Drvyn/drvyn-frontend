@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import { ChevronRight, ChevronDown, Check, Shield, Star, Circle, Trash2, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup, useTransform, useMotionValue, animate } from 'framer-motion';
+import Head from 'next/head';
 
 type CarInfo = {
   brand?: string;
@@ -288,6 +289,57 @@ const ServicePage = () => {
   }
 
   return (
+    <>
+         <Head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "CarRepair",
+              "name": "Drvyn",
+              "image": "https://www.drvyn.in/favicon2.png",
+              "@id": "https://www.drvyn.in",
+              "url": "https://www.drvyn.in/service",
+              "telephone": "+91 98402 77116",
+              "priceRange": "₹₹",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Sokkamputhur Rd, Shanmuga Nagar, Selvapuram North",
+                "addressLocality": "Coimbatore",
+                "postalCode": "641039",
+                "addressRegion": "TN",
+                "addressCountry": "IN"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 10.9920,
+                "longitude": 76.9327
+              },
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday"
+                ],
+                "opens": "09:00",
+                "closes": "19:00"
+              },
+              "sameAs": [
+                "https://www.facebook.com/your-profile",
+                "https://www.instagram.com/your-profile"
+              ]
+            })
+          }}
+        />
+      </Head>
+
+
+      
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Navbar />
       
@@ -872,6 +924,7 @@ const ServicePage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
