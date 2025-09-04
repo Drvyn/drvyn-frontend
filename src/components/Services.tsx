@@ -70,8 +70,8 @@ export default function Services() {
   return (
     <section id="services" className="py-10 md:py-20 relative overflow-hidden flex flex-col items-center justify-center min-h-screen">
       {/* Decorative elements - Hidden on mobile for better performance */}
-      <div className="hidden sm:block absolute top-0 left-0 w-48 h-48 md:w-72 md:h-72 bg-blue-100 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-30"></div>
-      <div className="hidden sm:block absolute bottom-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-blue-100 rounded-full translate-x-1/3 translate-y-1/3 opacity-20"></div>
+      <div className=" absolute top-0 left-0 w-48 h-48 md:w-72 md:h-72 bg-blue-100 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-30"></div>
+      <div className=" absolute bottom-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-blue-100 rounded-full translate-x-1/3 translate-y-1/3 opacity-20"></div>
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10 flex flex-col items-center justify-center">
         {/* Enhanced Header - Centered */}
