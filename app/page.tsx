@@ -3,6 +3,7 @@ import Banner from "@/components/Banner";
 import Services from "@/components/Services";
 import Process from "@/components/Process";
 import Brands from "@/components/Brands";
+import Poster from "@/components/Poster";
 
 export const metadata = {
   title: "Drvyn - Premier Car Services in Coimbatore",
@@ -19,6 +20,7 @@ export default function HomePage() {
       <Navbar />
       <Banner />
       <Services />
+      <Poster/>
       <Process />
       <Brands />
     </>

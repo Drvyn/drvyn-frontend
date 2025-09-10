@@ -93,22 +93,22 @@ export default function Process() {
               className="group relative"
             >
               <div className="h-full flex flex-col rounded-2xl p-8 border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-all duration-500 group-hover:border-blue-200 relative overflow-hidden text-center items-center">
-                {/* Icon container */}
-                <div className="relative w-20 h-20 mb-6 rounded-2xl flex items-center justify-center p-4 transition-colors duration-500 mx-auto">
+                {/* Icon container  */}
+                <div className="relative w-28 h-28 mb-6 rounded-2xl flex items-center justify-center p-4 transition-colors duration-500 mx-auto">
                   <Image
                     src={step.icon}
                     alt={step.title}
-                    width={160}
-                    height={160}
+                    width={200} 
+                    height={200} 
                     className="object-contain transition-transform duration-500 group-hover:scale-110 mx-auto"
                   />
                 </div>
-               
+                
                 {/* Title */}
                 <h3 className="text-xl font-bold text-gray-900 mb-4 transition-colors duration-300 text-center">
                   {step.title}
                 </h3>
-               
+                
                 {/* Description */}
                 <p className="text-gray-600 leading-relaxed text-center">
                   {step.desc}

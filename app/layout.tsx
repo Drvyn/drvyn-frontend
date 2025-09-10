@@ -45,7 +45,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: "Drvyn - Premier Car Services in Coimbatore",
     description: "Experience premier car services in Coimbatore. Get instant quotes for your car service.",
-    images: ['/og-image.jpg'],
+    images: ['/favicon3.png'],
   },
   robots: {
     index: true,
@@ -60,7 +60,7 @@ export const metadata = {
   },
   icons: {
     icon: "/favicon3.png",
-    apple: "/apple-logo.png", 
+    apple: "/favicon3.png", 
   },
 };
 
