@@ -300,7 +300,7 @@ const ServicePage = () => {
               "name": "Drvyn",
               "image": "https://drvyn.in/favicon2.png",
               "@id": "https://drvyn.in",
-              "url": "https://drvyn.in/service",
+              "url": "https://drvyn.in",
               "telephone": "+91 98402 77116",
               "priceRange": "₹₹",
               "address": {
