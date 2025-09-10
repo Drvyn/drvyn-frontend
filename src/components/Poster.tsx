@@ -1,46 +1,64 @@
-"use client"
+// components/Poster.js
 
-import Image from 'next/image'
-import {Swiper, SwiperSlide} from 'swiper/react'
-import { Navigation, Pagination , Autoplay  } from 'swiper/modules'
+"use client";
 
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
+import React from 'react';
+import Image from 'next/image';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 
-const posterImages= [
-    '/poster/poster1.JPG',
-    '/poster/poster2.JPG',
-]
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
+const posterImages = [
+  '/poster/poster1.JPG', // Ensure the exact file name and case
+  '/poster/poster2.JPG', // Ensure the exact file name and case
+];
 
 const Poster = () => {
-    return(
-        <div className="w-full px-4 my-8 md:px-8">
-
-        <Swiper
+  return (
+    // ADDED 'my-8' FOR TOP AND BOTTOM MARGIN.
+    <div className="w-full px-4 md:px-8 my-8"> 
+      <Swiper
         modules={[Navigation, Pagination, Autoplay]}
         slidesPerView={1}
         spaceBetween={0}
         loop={true}
         autoplay={{
-            delay: 3000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
+          delay: 3000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
         }}
         pagination={{
-            clickable:true,
-            dynamicBullets:true,
+          clickable: true,
+          dynamicBullets: true,
         }}
         navigation={true}
-        className='mySwiper'
-        />
-        {posterImages.map((src,index)=>(
-            <SwiperSlide></SwiperSlide>
+        className="mySwiper"
+      >
+        {posterImages.map((src, index) => (
+          <SwiperSlide key={index}>
+            <div 
+              style={{ position: 'relative', width: '100%', paddingTop: '30%' }}
+              className="rounded-lg overflow-hidden shadow-lg"
+            >
+              <Image
+                src={src}
+                alt={`Poster slide ${index + 1}`}
+                fill
+                style={{ objectFit: 'cover' }}
+                priority={index === 0}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+                quality={90}
+              />
+            </div>
+          </SwiperSlide>
         ))}
-            
-        </div>
-    );
-}
+      </Swiper>
+    </div>
+  );
+};
 
 export default Poster;
