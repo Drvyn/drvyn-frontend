@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
    images: {
     domains: [
       'localhost',
+      'drvyn.in',
       'www.drvyn.in',      
       'drvyn-frontend.vercel.app', 
       'drvyn-backend.onrender.com'   

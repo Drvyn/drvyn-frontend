@@ -298,9 +298,9 @@ const ServicePage = () => {
               "@context": "https://schema.org",
               "@type": "CarRepair",
               "name": "Drvyn",
-              "image": "https://www.drvyn.in/favicon2.png",
-              "@id": "https://www.drvyn.in",
-              "url": "https://www.drvyn.in/service",
+              "image": "https://drvyn.in/favicon2.png",
+              "@id": "https://drvyn.in",
+              "url": "https://drvyn.in/service",
               "telephone": "+91 98402 77116",
               "priceRange": "₹₹",
               "address": {

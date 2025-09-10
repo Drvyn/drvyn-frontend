@@ -21,14 +21,14 @@ export const metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://www.drvyn.in'),
+  metadataBase: new URL('https://drvyn.in'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: "Drvyn - Premier Car Services in Coimbatore",
     description: "Experience premier car services in Coimbatore. Get instant quotes for your car service.",
-    url: 'https://www.drvyn.in',
+    url: 'https://drvyn.in',
     siteName: 'Drvyn',
     images: [
       {

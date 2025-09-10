@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://www.drvyn.in/sitemap.xml
+Sitemap: https://drvyn.in/sitemap.xml
