@@ -4,6 +4,7 @@ import Services from "@/components/Services";
 import Process from "@/components/Process";
 import Brands from "@/components/Brands";
 import Poster from "@/components/Poster";
+import Choice from "@/components/Choice";
 
 export const metadata = {
   title: "Drvyn - Premier Car Services in Coimbatore",
@@ -23,6 +24,7 @@ export default function HomePage() {
       <Poster/>
       <Process />
       <Brands />
+      <Choice/>
     </>
   );
 }

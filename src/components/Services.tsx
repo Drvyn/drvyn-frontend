@@ -1,8 +1,6 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { motion, Variants } from "framer-motion";
+import { StaggeredContainer, FadeInUp, ViewFadeInUp } from './ClientAnimations';
 
 const services = [
   {
@@ -43,45 +41,14 @@ const services = [
   },
 ];
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { y: 30, opacity: 0, scale: 0.95 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.6,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-};
-
 export default function Services() {
   return (
     <section id="services" className="py-10 md:py-20 relative overflow-hidden flex flex-col items-center justify-center min-h-screen">
-      {/* Decorative elements - Hidden on mobile for better performance */}
-      <div className=" absolute top-0 left-0 w-48 h-48 md:w-72 md:h-72 bg-blue-100 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-30"></div>
-      <div className=" absolute bottom-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-blue-100 rounded-full translate-x-1/3 translate-y-1/3 opacity-20"></div>
+      <div className="absolute top-0 left-0 w-48 h-48 md:w-72 md:h-72 bg-blue-100 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-30"></div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-blue-100 rounded-full translate-x-1/3 translate-y-1/3 opacity-20"></div>
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10 flex flex-col items-center justify-center">
-        {/* Enhanced Header - Centered */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-          className="text-center max-w-4xl mx-auto mb-12 md:mb-20 flex flex-col items-center justify-center"
-        >
+        <ViewFadeInUp className="text-center max-w-4xl mx-auto mb-12 md:mb-20 flex flex-col items-center justify-center">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6 text-center">
             Premium <span className="text-blue-600 relative">Auto Care
             <svg className="absolute -bottom-1 md:-bottom-2 left-0 right-0 mx-auto w-full" viewBox="0 0 200 10" xmlns="http://www.w3.org/2000/svg">
@@ -92,26 +59,17 @@ export default function Services() {
           <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed text-center px-2 sm:px-0">
             Experience top-quality automotive services with our expert technicians. We use cutting-edge technology and premium products to keep your vehicle in perfect condition.
           </p>
-        </motion.div>
+        </ViewFadeInUp>
 
-        {/* Services Grid - Responsive adjustments */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full place-items-center"
-        >
+        <StaggeredContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full place-items-center">
           {services.map((service, index) => (
-            <motion.div
+            <FadeInUp
               key={index}
-              variants={itemVariants}
-              whileHover={{ y: -10 }}
+              liftOnHover={true}
               className="group relative flex flex-col items-center justify-center w-full max-w-sm sm:max-w-none"
             >
               <Link href={service.link} className="block h-full w-full flex flex-col items-center">
                 <div className="h-full w-full flex flex-col rounded-xl md:rounded-2xl p-5 sm:p-6 md:p-8 border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-all duration-500 group-hover:border-blue-200 relative overflow-hidden text-center items-center justify-center">
-                  {/* Icon container */}
                   <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mb-4 md:mb-6 rounded-xl md:rounded-2xl flex items-center justify-center p-3 md:p-4 transition-colors duration-500 mx-auto">
                     <Image
                       src={service.image}
@@ -121,18 +79,12 @@ export default function Services() {
                       className="object-contain transition-transform duration-500 group-hover:scale-110 mx-auto w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
                     />
                   </div>
-                 
-                  {/* Title */}
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 md:mb-4 transition-colors duration-300 text-center">
                     {service.title}
                   </h3>
-                 
-                  {/* Description */}
                   <p className="text-sm sm:text-base text-gray-600 mb-4 md:mb-6 leading-relaxed flex-grow text-center">
                     {service.description}
                   </p>
-
-                  {/* CTA */}
                   <div className="mt-auto flex items-center justify-center text-blue-600 font-semibold text-xs sm:text-sm">
                     <span>Explore Service</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -141,9 +93,9 @@ export default function Services() {
                   </div>
                 </div>
               </Link>
-            </motion.div>
+            </FadeInUp>
           ))}
-        </motion.div>
+        </StaggeredContainer>
       </div>
     </section>
   );
