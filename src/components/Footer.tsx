@@ -1,4 +1,4 @@
-{/* import Link from "next/link";
+ import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Clock, Wrench, Car, Shield, Battery } from "lucide-react";
 import { FiInstagram, FiFacebook, FiTwitter, FiYoutube } from "react-icons/fi";           
@@ -34,6 +34,7 @@ export default function Footer() {
                 />
 
               <span className="text-2xl font-bold text-gray-900">DRVYN</span>
+              <sup className="text-[1rem] relative -top-1 ml-0.5">™</sup>
             </div>
             <div className="space-y-3">
              <p className="text-sm text-gray-600 mb-4">
@@ -139,4 +140,3 @@ export default function Footer() {
   );
 }
 
-*/}

@@ -70,7 +70,7 @@ const Navbar = () => {
               className="text-lg sm:text-xl font-bold text-black cursor-pointer"
             >
               Drvyn
-              {/* <sup className="text-[1rem] relative -top-1 ml-0.5">™</sup>*/}
+               <sup className="text-[1rem] relative -top-1 ml-0.5">™</sup>
             </motion.span>
           </Link> 
         </motion.div>
