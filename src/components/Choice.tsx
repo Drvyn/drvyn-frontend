@@ -138,7 +138,7 @@ const ServiceAdvantage = () => {
           </div>
           <HoverScale>
             <a
-              href="/book-appointment"
+              href="/"
               className="mt-6 md:mt-0 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 whitespace-nowrap relative z-10 shadow-md"
             >
               Book Appointment

@@ -1,4 +1,4 @@
- import Link from "next/link";
+import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Clock, Wrench, Car, Shield, Battery } from "lucide-react";
 import { FiInstagram, FiFacebook, FiTwitter, FiYoutube } from "react-icons/fi";           
