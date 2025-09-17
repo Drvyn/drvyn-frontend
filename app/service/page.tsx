@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from 'react';
 import Navbar from '@/components/Navbar';
+import RouteGuard from '@/components/RouteGuard';
 import Image from 'next/image';
 import { ChevronRight, ChevronDown, Check, Shield, Star, Circle, Trash2, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup, useTransform, useMotionValue, animate } from 'framer-motion';
@@ -289,6 +290,10 @@ const ServicePage = () => {
   }
 
   return (
+    <RouteGuard 
+      requiredData="carFormData" 
+      redirectTo="/"
+    >
     <>
          <Head>
         <script
@@ -925,6 +930,7 @@ const ServicePage = () => {
       </div>
     </div>
     </>
+    </RouteGuard>
   );
 };
 
