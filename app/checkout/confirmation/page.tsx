@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import RouteGuard from "@/components/RouteGuard";
 import { motion } from "framer-motion";
 import { Download, Calendar, Clock, MapPin, Phone, Package } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -114,9 +113,6 @@ const ConfirmationPage = () => {
   }
 
   return (
-    <RouteGuard
-    requiredData="bookingDetails"
-    redirectTo="/">
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 flex items-center justify-center p-4 sm:p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -346,7 +342,6 @@ const ConfirmationPage = () => {
         </div>
       </motion.div>
     </div>
-    </RouteGuard>
   );
 };
 
