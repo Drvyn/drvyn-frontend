@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import RouteGuard from "@/components/RouteGuard";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
@@ -156,6 +157,9 @@ const CheckoutPage = () => {
   };
 
   return (
+    <RouteGuard
+    requiredData={["carFormData", "cart"]}
+    redirectTo="/">
     <div className="min-h-screen bg-gray-50">
       {/* Header with animation */}
       <motion.div 
@@ -414,6 +418,7 @@ const CheckoutPage = () => {
         </motion.div>
       </div>
     </div>
+    </RouteGuard>
   );
 };
 
