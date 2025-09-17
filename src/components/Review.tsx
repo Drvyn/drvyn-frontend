@@ -1,0 +1,122 @@
+import React from 'react';
+import { StaggeredContainer, FadeInUp, ViewFadeInUp, ScaleIn } from './ClientAnimations';
+import InteractiveReviews from './InteractiveReviews';
+import type { Testimonial } from './InteractiveReviews';
+
+
+const testimonials: Testimonial[] = [
+    {
+    name: "Raja",
+    location: "Coimbatore",
+    rating: 5,
+    text: "I recently gave my car for service, and overall, I had a good experience. Manimegalai and Mukesh from the team attended to my vehicle and ensured the service was completed properly. They were polite, responsive, and explained the work done clearly. The service quality was satisfactory. Thank you for the support!"
+  },
+  {
+    name: "ROSHANRAKESH P",
+    location: "Coimbatore",
+    rating: 5,
+    text: "I would rate 4.5/5. They even take little problems in their hand without any hesitation unlike the company showrooms. They attend breakdowns within a day of call at your door steps. Quick and best resolution for complications. I would highly recommend all coimbatorians to carage car care and especially for older vehicles. My executive Mr. Mukesh is a thorough professional and a great coordinator. I thank him so much for his exceptional services to my car."
+  },
+  {
+    name: "CR Sankar",
+    location: "Coimbatore",
+    rating: 5,
+    text: "I would like to thank and applaud the Drvyn Team. PROS: Good customer communication (Asik was very good in his updates). Skilled team (Prashanth & Surya) who worked on my car (Manikutan). Good work area, where multiple vehicles can be addressed simultaneously. I visited Carage for suspension-related work (Lower Arm, Link Rod). It was a tight schedule that I had requested, but the team managed to give me a slot and delivered a good outcome. Thank you so much, team."
+  },
+  {
+    name: "Suresh Aruchamy",
+    location: "Coimbatore",
+    rating: 4,
+    text: "It was a wonderful experience,their service was really good and they are more responsive and delivered the car on time."
+  },
+    {
+    name: "Prithvi",
+    location: "Coimbatore",
+    rating: 5,
+    text: "I have been servicing my car here for a long time now and I have always found them prompt, reliable and consistent in their quality of work. All staffs here are friendly and courteous and make the whole process seamless. They really do a good job for the best price. For the past few maintenance checks I have been dealing with Mr. Asik and found it great as he is really friendly and explains you about the work that will be carried out and most importantly he keeps me updated promptly about the car’s status and has always tried to deliver ahead of schedule or accomodate to my schedule. I have had all sorts of maintenance work done here incl. electrical, painting, dent repairs and highly recommend getting checked here"
+  },
+  {
+    name: "ganesh kannan",
+    location: "Coimbatore",
+    rating: 5,
+    text: "Fantastically done all repairs in my 2016 jazz complients... 100% satisfied... At low cost too...."
+  },
+  {
+    name: "Pradeeshkumar Nithiyaudhayan",
+    location: "Coimbatore",
+    rating: 4,
+    text: "I give my tata nano for service while it was not running condition but I was really happy they changed all parts with the genuine spares the cost wise pretty ok .... the staff and owner are behave awesome and good it was good experience for me ....."
+  },
+  {
+    name: "Praveen sanjay",
+    location: "Coimbatore",
+    rating: 5,
+    text: "A good place do the service to your car. Felt price as a little bit premium but worth it."
+  },
+  {
+    name: "Karthi Gold Foil Printers",
+    location: "Coimbatore",
+    rating: 5,
+    text: "Good Expirience Best service Affordable pricing"
+  }
+];
+
+const Review = () => {
+
+  const averageRating = (
+    testimonials.reduce((acc, t) => acc + t.rating, 0) / testimonials.length
+  ).toFixed(1);
+  
+  return (
+    <section id="reviews" className="bg-gray-50 py-20 sm:py-24 lg:py-32 relative overflow-hidden">
+      <ScaleIn delay={0.3} duration={1.2}>
+        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-100 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-30" />
+      </ScaleIn>
+      <ScaleIn delay={0.5} duration={1.2}>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-100 rounded-full translate-x-1/3 translate-y-1/3 opacity-20" />
+      </ScaleIn>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <ViewFadeInUp className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
+            Hear From Our Happy Customers
+          </h2>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+            Discover why thousands of car owners trust VehicleCare for their automotive needs
+          </p>
+        </ViewFadeInUp>
+        
+        <StaggeredContainer className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-16">
+          <FadeInUp>
+            <div className="bg-white p-6 rounded-xl shadow text-center h-full flex flex-col justify-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">1000+</div>
+              <div className="text-gray-600">Happy Customers</div>
+            </div>
+          </FadeInUp>
+          <FadeInUp>
+            <div className="bg-white p-6 rounded-xl shadow text-center h-full flex flex-col justify-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">4.8</div>
+              <div className="text-gray-600">Average Rating</div>
+            </div>
+          </FadeInUp>
+          <FadeInUp>
+             <div className="bg-white p-6 rounded-xl shadow text-center h-full flex flex-col justify-center">
+               <div className="text-3xl font-bold text-blue-600 mb-2">10+</div>
+               <div className="text-gray-600">Services Offered</div>
+             </div>
+           </FadeInUp>
+           <FadeInUp>
+             <div className="bg-white p-6 rounded-xl shadow text-center h-full flex flex-col justify-center">
+               <div className="text-3xl font-bold text-blue-600 mb-2">24/7</div>
+               <div className="text-gray-600">Customer Support</div>
+             </div>
+           </FadeInUp>
+        </StaggeredContainer>
+        
+        <InteractiveReviews testimonials={testimonials} />
+      </div>
+    </section>
+  );
+};
+
+export default Review;

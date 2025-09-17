@@ -62,8 +62,8 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Home</Link></li>
               <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Services</Link></li>
+              <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Blog</Link></li>
               <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>About Us</Link></li>
-              <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Pricing</Link></li>
               <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Contact</Link></li>
             </ul>
           </div>
@@ -116,7 +116,7 @@ export default function Footer() {
         <div className="pt-6 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-xs text-gray-500 mb-3 md:mb-0">
-              © {currentYear} AutoElite®. All rights reserved. | Reg. No: 12345678
+              © {currentYear} AutoElite®. All rights reserved.
             </p>
             
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">

@@ -125,7 +125,7 @@ const ServiceAdvantage = () => {
         </StaggeredContainer>
 
         {/* Action Section */}
-        <ViewFadeInUp className="mt-16 bg-white rounded-xl shadow-sm p-8 border border-slate-100 flex flex-col md:flex-row justify-between items-center text-center md:text-left relative overflow-hidden">
+        <ViewFadeInUp className="mt-16 bg-white rounded-xl shadow-sm p-8 border border-slate-100 flex flex-col md:flex-row justify-between items-center text-center md:text-left relative overflow-hidden gap-6">
           <ScaleIn delay={0.4} className="absolute bottom-0 left-0 w-40 h-40 -mb-8 -ml-8 bg-blue-50 rounded-full opacity-50" children={undefined}></ScaleIn>
           <div className="relative z-10">
             <h2 className="text-2xl font-bold text-slate-900">
@@ -139,7 +139,7 @@ const ServiceAdvantage = () => {
           <HoverScale>
             <a
               href="/"
-              className="mt-6 md:mt-0 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 whitespace-nowrap relative z-10 shadow-md"
+              className="w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 whitespace-nowrap relative z-10 shadow-md"
             >
               Book Appointment
             </a>

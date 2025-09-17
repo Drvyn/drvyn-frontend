@@ -6,6 +6,7 @@ import Brands from "@/components/Brands";
 import Poster from "@/components/Poster";
 import Choice from "@/components/Choice";
 import Footer from "@/components/Footer";
+import Review from "@/components/Review";
 
 export const metadata = {
   title: "Drvyn - Premier Car Services in Coimbatore",
@@ -26,6 +27,7 @@ export default function HomePage() {
       <Process />
       <Brands />
       <Choice/>
+      <Review/>
       <Footer/>
     </>
   );
