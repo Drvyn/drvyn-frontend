@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { StaggeredContainer, FadeInUp, ViewFadeInUp, ScaleIn } from './ClientAnimations';
+import { StaggeredContainer, FadeInUp, ViewFadeInUp } from './ClientAnimations';
 
 export default function Process() {
   const steps = [
@@ -27,8 +27,8 @@ export default function Process() {
 
   return (
     <section id="process" className="bg-gray-50 py-20 relative overflow-hidden">
-     <ScaleIn className="absolute top-0 left-0 w-72 h-72 bg-blue-100 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-30" children={undefined} />
-      <ScaleIn delay={0.2} duration={1} className="absolute bottom-0 right-0 w-96 h-96 bg-blue-100 rounded-full translate-x-1/3 translate-y-1/3 opacity-20" children={undefined} />
+      <div className="absolute top-0 left-0 w-72 h-72 bg-blue-100 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-30"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-100 rounded-full translate-x-1/3 translate-y-1/3 opacity-20"></div>
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <ViewFadeInUp className="text-center max-w-4xl mx-auto mb-20">
