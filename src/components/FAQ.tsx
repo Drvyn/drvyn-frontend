@@ -1,5 +1,5 @@
 import type { NextPage } from 'next';
-import { StaggeredContainer, FadeInUp, ScaleIn } from './ClientAnimations';
+import { StaggeredContainer, FadeInUp, ScaleIn, ScaleXOnView } from './ClientAnimations';
 import { FAQAccordion } from './FAQAccordion'; // Import the new client component
 
 const FAQ: NextPage = () => {
@@ -13,7 +13,17 @@ const FAQ: NextPage = () => {
           <div className="text-center mb-12">
             <FadeInUp>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                Frequently Asked Questions
+                Frequently               <span className="text-blue-600 relative mx-2">
+                                Asked
+                                <ScaleXOnView delay={0.5} duration={0.6} className="absolute -bottom-2 left-0 right-0 mx-auto w-full">
+                                  <svg
+                                    viewBox="0 0 200 10"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path d="M0,5 C50,0 150,10 200,5" stroke="currentColor" strokeWidth="2" fill="none" className="text-blue-200" />
+                                  </svg>
+                                </ScaleXOnView>
+                              </span> Questions
               </h1>
             </FadeInUp>
             <FadeInUp>

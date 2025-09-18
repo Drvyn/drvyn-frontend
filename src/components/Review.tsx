@@ -1,5 +1,5 @@
 import React from 'react';
-import { StaggeredContainer, FadeInUp, ViewFadeInUp, ScaleIn } from './ClientAnimations';
+import { StaggeredContainer, FadeInUp, ViewFadeInUp, ScaleIn, ScaleXOnView } from './ClientAnimations';
 import InteractiveReviews from './InteractiveReviews';
 import type { Testimonial } from './InteractiveReviews';
 
@@ -79,7 +79,17 @@ const Review = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <ViewFadeInUp className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
-            Hear From Our Happy Customers
+            Hear From Our               <span className="text-blue-600 relative mx-2">
+                            Drvyn
+                            <ScaleXOnView delay={0.5} duration={0.6} className="absolute -bottom-2 left-0 right-0 mx-auto w-full">
+                              <svg
+                                viewBox="0 0 200 10"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M0,5 C50,0 150,10 200,5" stroke="currentColor" strokeWidth="2" fill="none" className="text-blue-200" />
+                              </svg>
+                            </ScaleXOnView>
+                          </span> Customers
           </h2>
           <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
             Discover why thousands of car owners trust VehicleCare for their automotive needs
