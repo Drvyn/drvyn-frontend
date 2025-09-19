@@ -72,7 +72,7 @@ export const FAQAccordion = () => {
               aria-controls={`faq-answer-${index}`}
             >
               <span className="text-lg font-medium text-gray-700">{item.question}</span>
-              <span className="text-2xl text-gray-500 transform transition-transform duration-300">
+              <span className="text-2xl text-blue-500 cursor-pointer transform transition-transform duration-300">
                 {activeIndex === index ? (
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
