@@ -5,6 +5,12 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Image from 'next/image';
 import { motion, AnimatePresence } from "framer-motion";
+import { Work_Sans } from 'next/font/google';
+
+const workSans = Work_Sans({ 
+  subsets: ['latin'], 
+  weight: ['400', '500', '700'] 
+});
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +29,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Services", href: "" },
-    { name: "Blog", href: "" },
+    { name: "Blog", href: "/blog" },
     { name: "About", href: "" },
     { name: "Contact", href: "" },
     { name: "Login", href: "" },
@@ -38,19 +44,23 @@ const Navbar = () => {
         background: scrolled ? 'rgba(255, 255, 255, 0.98)' : 'rgba(255, 255, 255, 1)',
         boxShadow: scrolled 
           ? '0 8px 30px rgba(0, 0, 0, 0.15)' 
-          : '0 4px 12px rgba(0, 0, 0, 0.08)'
+          : '0 4px 12px rgba(0, 0, 0, 0.08)',
+        paddingTop: scrolled ? '0.75rem' : '1rem',
+        paddingBottom: scrolled ? '0.75rem' : '1rem',
       }}
       transition={{ 
         y: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
         opacity: { duration: 0.5, ease: "easeOut" },
         background: { duration: 0.4 },
-        boxShadow: { duration: 0.4 }
+        boxShadow: { duration: 0.4 },
+        paddingTop: { duration: 0.4 },
+        paddingBottom: { duration: 0.4 }
       }}
-      className={`px-4 sm:px-6 py-4 sticky top-0 z-50 ${scrolled ? 'border-b border-gray-100' : ''}`}
+
+      className={`${workSans.className} px-4 sm:px-6 sticky top-0 z-50 ${scrolled ? 'border-b border-gray-100' : ''}`}
     >
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         
-        {/* Logo and Brand */}
         <motion.div 
           className="flex items-center gap-20"
         >
@@ -75,20 +85,17 @@ const Navbar = () => {
           </Link> 
         </motion.div>
 
-        {/* Desktop Navigation - Original font and size maintained */}
         <ul className="hidden md:flex items-center gap-4 lg:gap-6">
           {navLinks.map((link) => (
             <motion.li 
               key={link.name}
               className="relative"
-
               transition={{ type: "spring", stiffness: 400 }}
             >
               {link.name === "Login" ? (
                 <Link
                   href={link.href}
                   className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-5 py-2 text-sm rounded-full font-bold tracking-tight hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-sm hover:shadow-md"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {link.name}
                 </Link>
@@ -100,7 +107,7 @@ const Navbar = () => {
                   >
                     <span 
                       className="relative z-10 text-sm font-medium text-gray-800 tracking-tight hover:text-blue-600 transition-colors duration-200"
-                      style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '0.5px' }}
+                      style={{ letterSpacing: '0.5px' }} 
                     >
                       {link.name.toUpperCase()}
                     </span>
@@ -112,7 +119,6 @@ const Navbar = () => {
           ))}
         </ul>
 
-        {/* Mobile Menu Button */}
         <motion.div 
           className="md:hidden z-50"
           whileHover={{ scale: 1.05 }}
@@ -133,7 +139,6 @@ const Navbar = () => {
         </motion.div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div 
@@ -149,7 +154,7 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="absolute right-0 -top-12 rounded-lg w-64 bg-white shadow-lg overflow-y-auto"
+              className="absolute right-0 top-0 h-full w-64 bg-white shadow-lg overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6 pt-20 space-y-3">
@@ -171,7 +176,6 @@ const Navbar = () => {
                         href={link.href}
                         onClick={() => setIsOpen(false)}
                         className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base md:text-lg px-6 md:px-8 py-3 rounded-full shadow-md transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-                        style={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         {link.name}
                       </Link>

@@ -1,0 +1,269 @@
+import Link from 'next/link';
+import Image from 'next/image';
+import { notFound } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import SocialShareButtons from '@/components/SocialShareButtons';
+import Footer from '@/components/Footer';
+
+interface BlogPost {
+  [x: string]: any;
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  author: string;
+  authorRole: string;
+  image: string;
+  readTime: string;
+}
+
+async function getBlogPost(slug: string): Promise<BlogPost | null> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const response = await fetch(`${apiUrl}/api/blog/${slug}`, {
+      next: { revalidate: 60 } 
+    });
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch blog post');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    return null;
+  }
+}
+
+interface BlogPostParams {
+  params: {
+    slug: string;
+  };
+}
+
+export default async function BlogPostPage({ params }: BlogPostParams) {
+  const post = await getBlogPost(params.slug);
+
+  if (!post) {
+    notFound();
+  }
+
+  return (
+    <>
+      <Navbar/>
+      <article className="min-h-screen bg-white">
+        <div className="relative container mx-auto px-4 max-w-4xl py-12">
+          {/* Back Button with Enhanced Styling */}
+          <Link 
+            href="/blog" 
+            className="group inline-flex items-center text-black-600 hover:text-black-800 mb-8 transition-all duration-300 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full"
+          >
+            <svg 
+              className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Blog
+          </Link>
+          
+          {/* Header Image */}
+          <div className="relative h-80 w-full mb-8 rounded-xl overflow-hidden group">
+            <Image
+              src={post.image || '/api/placeholder/800/400'}
+              alt={post.title}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/10" />
+          </div>
+          
+          {/* Article Header */}
+          <header className="mb-12 text-center">
+            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-medium mb-4">
+              <span>📖</span>
+              <span>{post.readTime}</span>
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              {post.title}
+            </h1>
+            
+            <div className="flex flex-wrap items-center justify-center gap-4 text-gray-600 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <time dateTime={post.date}>{new Date(post.date).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}</time>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    {/*{post.author.split(' ').map(n => n[0]).join('')}*/}
+
+                    <Image
+                      src="/favicon3.png"
+                      alt={post.author}
+                      width={32}
+                      height={32}
+                      className="object-cover"
+                  />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{post.author}</p>
+                    {/* <p className="text-sm text-gray-600">{post.authorRole}</p>*/}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+          
+          {/* Article Content */}
+          <div className="prose prose-lg max-w-none 
+            prose-headings:text-gray-900 prose-headings:font-bold
+            prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+            prose-p:text-gray-700 prose-p:leading-relaxed
+            prose-strong:text-gray-900 prose-strong:font-semibold
+            prose-li:text-gray-700 prose-li:marker:text-blue-500
+            prose-a:text-blue-600 prose-a:no-underline prose-a:border-b-2 prose-a:border-blue-200 prose-a:hover:border-blue-600
+            prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r
+            prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:text-gray-800
+            prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
+            prose-img:rounded-xl prose-img:shadow-md
+            prose-table:border prose-table:border-gray-300
+            prose-th:bg-gray-100 prose-th:text-gray-900
+            prose-td:border prose-td:border-gray-300
+            mb-16">
+            <div 
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+          </div>
+          
+          {/* Share Section */}
+          <div className="border-t border-gray-200 pt-8 mb-16">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Enjoyed this article?</h3>
+                <p className="text-gray-600">Share it with your network</p>
+              </div>
+              <SocialShareButtons 
+                title={post.title}
+                
+              />
+            </div>
+          </div>
+
+          {/* Comment Section */}
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 mb-16">
+            <div className="max-w-2xl mx-auto">
+              <div className="text-center mb-10">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-3">Join the Conversation</h2>
+                <p className="text-gray-600">Share your thoughts and insights about this article</p>
+              </div>
+              
+              <form className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-3">
+                      Your Name *
+                    </label>
+                    <input 
+                      type="text" 
+                      id="name" 
+                      className="w-full p-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Enter your name"
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-3">
+                      Email Address *
+                    </label>
+                    <input 
+                      type="email" 
+                      id="email" 
+                      className="w-full p-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="your@email.com"
+                      required 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="message" className="block text-sm font-semibold text-gray-900 mb-3">
+                    Your Message *
+                  </label>
+                  <textarea 
+                    id="message" 
+                    rows={5} 
+                    className="w-full p-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-vertical"
+                    placeholder="What are your thoughts on this article?"
+                    required 
+                  />
+                </div>
+                <div className="flex items-center justify-between pt-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>Your information is secure and will not be shared</span>
+                  </div>
+                  <button 
+                    type="submit" 
+                    className="px-8 py-3 font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                  >
+                    Post Comment
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Related Articles Suggestion */}
+          <div className="text-center border-t border-gray-200 pt-12">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Explore More Articles</h3>
+            <p className="text-gray-600 mb-6">Discover other insightful content from our blog</p>
+            <Link 
+              href="/blog" 
+              className="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-lg text-blue-600 border-2 border-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300"
+            >
+              View All Articles
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </article>
+      <Footer/>
+    </>
+  );
+}
+
+export async function generateMetadata({ params }: BlogPostParams) {
+  const post = await getBlogPost(params.slug);
+  
+  if (!post) {
+    return {
+      title: "Post Not Found",
+    };
+  }
+  
+  return {
+    title: `${post.title} | Our Blog`,
+    description: post.excerpt,
+  };
+}

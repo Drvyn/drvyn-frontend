@@ -62,7 +62,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Home</Link></li>
               <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Services</Link></li>
-              <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Blog</Link></li>
+              <li><Link href="/blog" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Blog</Link></li>
               <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>About Us</Link></li>
               <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Contact</Link></li>
             </ul>
