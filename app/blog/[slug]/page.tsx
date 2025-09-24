@@ -38,7 +38,6 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
   }
 }
 
-
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = await getBlogPost(params.slug);
 
@@ -103,19 +102,16 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                 <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    {/*{post.author.split(' ').map(n => n[0]).join('')}*/}
-
                     <Image
                       src="/favicon3.png"
                       alt={post.author}
                       width={32}
                       height={32}
                       className="object-cover"
-                  />
+                    />
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">{post.author}</p>
-                    {/* <p className="text-sm text-gray-600">{post.authorRole}</p>*/}
                   </div>
                 </div>
               </div>
@@ -152,7 +148,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
               </div>
               <SocialShareButtons 
                 title={post.title}
-                
               />
             </div>
           </div>
