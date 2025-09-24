@@ -38,8 +38,10 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
   }
 }
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = await getBlogPost(params.slug);
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  // Await the params promise
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
 
   if (!post) {
     notFound();
@@ -236,8 +238,10 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   );
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const post = await getBlogPost(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  // Await the params promise here as well
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
   
   if (!post) {
     return {
@@ -247,6 +251,6 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   
   return {
     title: `${post.title} | Our Blog`,
-    description: post.excerpt,
+    description: post.excerpt || post.content.substring(0, 160) + '...', 
   };
 }
