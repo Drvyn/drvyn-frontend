@@ -38,13 +38,8 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
   }
 }
 
-interface BlogPostParams {
-  params: {
-    slug: string;
-  };
-}
 
-export default async function BlogPostPage({ params }: BlogPostParams) {
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = await getBlogPost(params.slug);
 
   if (!post) {
@@ -253,7 +248,7 @@ export default async function BlogPostPage({ params }: BlogPostParams) {
   );
 }
 
-export async function generateMetadata({ params }: BlogPostParams) {
+export async function generateMetadata({ params }: { params: { slug: string } }) {
   const post = await getBlogPost(params.slug);
   
   if (!post) {
