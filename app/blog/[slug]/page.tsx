@@ -21,7 +21,7 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const response = await fetch(`${apiUrl}/api/blog/${slug}`, {
-      next: { revalidate: 60 } 
+      next: { revalidate: 60 }
     });
     
     if (!response.ok) {
@@ -51,14 +51,14 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       <article className="min-h-screen bg-white">
         <div className="relative container mx-auto px-4 max-w-4xl py-12">
           {/* Back Button with Enhanced Styling */}
-          <Link 
-            href="/blog" 
+          <Link
+            href="/blog"
             className="group inline-flex items-center text-black-600 hover:text-black-800 mb-8 transition-all duration-300 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full"
           >
-            <svg 
-              className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -92,10 +92,10 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             <div className="flex flex-wrap items-center justify-center gap-4 text-gray-600 mb-6">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                <time dateTime={post.date}>{new Date(post.date).toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+                <time dateTime={post.date}>{new Date(post.date).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
                 })}</time>
               </div>
               <div className="flex items-center gap-3">
@@ -119,7 +119,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           </header>
           
           {/* Article Content */}
-          <div className="prose prose-lg max-w-none 
+          <div className="prose prose-lg max-w-none
             prose-headings:text-gray-900 prose-headings:font-bold
             prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
             prose-p:text-gray-700 prose-p:leading-relaxed
@@ -134,7 +134,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             prose-th:bg-gray-100 prose-th:text-gray-900
             prose-td:border prose-td:border-gray-300
             mb-16">
-            <div 
+            <div
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
           </div>
@@ -146,7 +146,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Enjoyed this article?</h3>
                 <p className="text-gray-600">Share it with your network</p>
               </div>
-              <SocialShareButtons 
+              <SocialShareButtons
                 title={post.title}
               />
             </div>
@@ -171,24 +171,24 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                     <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-3">
                       Your Name *
                     </label>
-                    <input 
-                      type="text" 
-                      id="name" 
+                    <input
+                      type="text"
+                      id="name"
                       className="w-full p-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="Enter your name"
-                      required 
+                      required
                     />
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-3">
                       Email Address *
                     </label>
-                    <input 
-                      type="email" 
-                      id="email" 
+                    <input
+                      type="email"
+                      id="email"
                       className="w-full p-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="your@email.com"
-                      required 
+                      required
                     />
                   </div>
                 </div>
@@ -196,12 +196,12 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                   <label htmlFor="message" className="block text-sm font-semibold text-gray-900 mb-3">
                     Your Message *
                   </label>
-                  <textarea 
-                    id="message" 
-                    rows={5} 
+                  <textarea
+                    id="message"
+                    rows={5}
                     className="w-full p-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-vertical"
                     placeholder="What are your thoughts on this article?"
-                    required 
+                    required
                   />
                 </div>
                 <div className="flex items-center justify-between pt-4">
@@ -211,8 +211,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                     </svg>
                     <span>Your information is secure and will not be shared</span>
                   </div>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="px-8 py-3 font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
                   >
                     Post Comment
@@ -226,8 +226,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           <div className="text-center border-t border-gray-200 pt-12">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Explore More Articles</h3>
             <p className="text-gray-600 mb-6">Discover other insightful content from our blog</p>
-            <Link 
-              href="/blog" 
+            <Link
+              href="/blog"
               className="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-lg text-blue-600 border-2 border-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300"
             >
               View All Articles
