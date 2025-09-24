@@ -50,7 +50,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       <Navbar/>
       <article className="min-h-screen bg-white">
         <div className="relative container mx-auto px-4 max-w-4xl py-12">
-          {/* Back Button with Enhanced Styling */}
           <Link
             href="/blog"
             className="group inline-flex items-center text-black-600 hover:text-black-800 mb-8 transition-all duration-300 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full"
@@ -66,7 +65,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             Back to Blog
           </Link>
           
-          {/* Header Image */}
           <div className="relative h-80 w-full mb-8 rounded-xl overflow-hidden group">
             <Image
               src={post.image || '/api/placeholder/800/400'}
@@ -78,7 +76,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             <div className="absolute inset-0 bg-black/10" />
           </div>
           
-          {/* Article Header */}
           <header className="mb-12 text-center">
             <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-medium mb-4">
               <span>📖</span>
@@ -118,7 +115,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             </div>
           </header>
           
-          {/* Article Content */}
           <div className="prose prose-lg max-w-none
             prose-headings:text-gray-900 prose-headings:font-bold
             prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
@@ -139,7 +135,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             />
           </div>
           
-          {/* Share Section */}
           <div className="border-t border-gray-200 pt-8 mb-16">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
               <div>
@@ -152,7 +147,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             </div>
           </div>
 
-          {/* Comment Section */}
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 mb-16">
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-10">
@@ -222,7 +216,6 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             </div>
           </div>
 
-          {/* Related Articles Suggestion */}
           <div className="text-center border-t border-gray-200 pt-12">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Explore More Articles</h3>
             <p className="text-gray-600 mb-6">Discover other insightful content from our blog</p>
