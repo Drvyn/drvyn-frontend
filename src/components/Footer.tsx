@@ -73,7 +73,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {carServices.map((service) => (
                 <li key={service.name}>
-                  <Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center">
+                  <Link href="" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center">
                     <span className="text-blue-600 mr-2">{service.icon}</span>
                     {service.name}
                   </Link>
