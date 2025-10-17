@@ -227,10 +227,10 @@ const Banner = () => {
       return;
     }
 
-    if (!otpVerified) {
-      setError("Please verify your phone number with OTP");
-      return;
-    }
+    // if (!otpVerified) {
+    //   setError("Please verify your phone number with OTP");
+    //   return;
+    // }
 
     try {
       sessionStorage.setItem(
@@ -423,7 +423,7 @@ const Banner = () => {
                           />
                         </div>
                         <div className="w-[30%] sm:w-auto">
-                          {!otpVerified && (
+                          {/* {!otpVerified && (
                             <button
                               type="button"
                               onClick={handleSendOtp}
@@ -442,7 +442,7 @@ const Banner = () => {
                                 ? "Resend"
                                 : "Send OTP"}
                             </button>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     </motion.div>
@@ -809,23 +809,22 @@ const Banner = () => {
       </div>
       <SocialMedia />
       <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
-          "@context": "https://drvyn.in",
-          "@type": "AutoRepair",
-          "name": "Drvyn",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Coimbatore",
-            "addressCountry": "IN"
-          },
-          "description": "Premier car services in Coimbatore"
-        })
-      }}
-    />
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://drvyn.in",
+            "@type": "AutoRepair",
+            "name": "Drvyn",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Coimbatore",
+              "addressCountry": "IN"
+            },
+            "description": "Premier car services in Coimbatore"
+          })
+        }}
+      />
     </section>
-    
   );
 };
 
