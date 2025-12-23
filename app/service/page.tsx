@@ -100,7 +100,7 @@ const ServicePage = () => {
       }).toString();
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service-packages?${queryParams}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/service-packages?${queryParams}`,
         { headers: { 'Content-Type': 'application/json' } }
       );
       
