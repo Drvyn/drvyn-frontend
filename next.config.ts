@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       'drvyn.in',
       'www.drvyn.in',      
       'drvyn-frontend.vercel.app', 
-      'drvyn-backend.onrender.com',
+      'https://drvyn-backend.vercel.app',
       'i.ibb.co'   
     ],
   },
