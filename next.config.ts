@@ -6,6 +6,26 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
    images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'drvyn-backend.vercel.app',
+        port: '',
+        pathname: '/media/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8000',
+        pathname: '/media/**',
+      },
+    ],
     domains: [
       'localhost',
       'drvyn.in',
