@@ -808,22 +808,6 @@ const Banner = () => {
         </div>
       </div>
       <SocialMedia />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://drvyn.in",
-            "@type": "AutoRepair",
-            "name": "Drvyn",
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Coimbatore",
-              "addressCountry": "IN"
-            },
-            "description": "Premier car services in Coimbatore"
-          })
-        }}
-      />
     </section>
   );
 };

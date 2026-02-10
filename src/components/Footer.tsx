@@ -15,7 +15,7 @@ export default function Footer() {
   ];
 
   const workingHours = [
-    { day: "Mon-Fri", hours: "9:00 AM - 7:00 PM" },
+    { day: "Mon-Sat", hours: "9:00 AM - 7:00 PM" },
     { day: "Sunday", hours: "Closed" }
   ];
 
@@ -38,33 +38,56 @@ export default function Footer() {
             </div>
             <div className="space-y-3">
              <p className="text-sm text-gray-600 mb-4">
-                Premium car care, powered by certified experts and genuine parts. Drvyn brings you hassle-free service, repairs, and insurance support with trusted workshops and smart technology across India.
+                Premium car care in Coimbatore, powered by certified experts and genuine parts. Drvyn brings you hassle-free service, repairs, and insurance support.
             </p>
             <div className="mt-4 flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-blue-600 transition-colors" aria-label="Facebook">
-                <FiFacebook  className="h-5 w-5" />
-              </Link>
+              {/* Updated Facebook Link */}
+              <a 
+                href="https://www.facebook.com/share/1FBSPqrZLe/?mibextid=wwXIfr" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-gray-400 hover:text-blue-600 transition-colors" 
+                aria-label="Facebook"
+              >
+                <FiFacebook className="h-5 w-5" />
+              </a>
+              
               <Link href="#" className="text-gray-400 hover:text-blue-600 transition-colors" aria-label="Twitter">
                 <FiTwitter className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-blue-600 transition-colors" aria-label="Instagram">
-                <FiInstagram  className="h-5 w-5" />
-              </Link>
+              
+              {/* Updated Instagram Link */}
+              <a 
+                href="https://www.instagram.com/drvynindia?igsh=MW04MjU4MGIzcjB4dA%3D%3D&utm_source=qr" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-gray-400 hover:text-blue-600 transition-colors" 
+                aria-label="Instagram"
+              >
+                <FiInstagram className="h-5 w-5" />
+              </a>
+              
               <Link href="#" className="text-gray-400 hover:text-blue-600 transition-colors" aria-label="YouTube">
-                <FiYoutube  className="h-5 w-5" />
+                <FiYoutube className="h-5 w-5" />
               </Link>
             </div>
             </div>
           </div>
-
+          
+          {/* ... Rest of the footer code remains the same ... */}
+          
           <div>
             <h3 className="text-sm font-semibold mb-4 text-gray-900 uppercase tracking-wider border-b pb-2">Explore</h3>
             <ul className="space-y-3">
-              <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Home</Link></li>
-              <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Services</Link></li>
+              <li><Link href="/" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Home</Link></li>
+              <li><Link href="/service" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Services</Link></li>
               <li><Link href="/blog" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Blog</Link></li>
-              <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>About Us</Link></li>
-              <li><Link href="#" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Contact</Link></li>
+              <li><Link href="/about" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>About</Link></li>
+              <li><Link href="/contact" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Contact</Link></li>
+              <li><Link href="/faq" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>F&Q</Link></li>
+              <li><Link href="/reviews" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Reviews</Link></li>
+              <li><Link href="/terms" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Terms & Condition</Link></li>
+              <li><Link href="/privacy-policy" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Privacy Policy</Link></li>
             </ul>
           </div>
 
@@ -73,7 +96,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {carServices.map((service) => (
                 <li key={service.name}>
-                  <Link href="" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center">
+                  <Link href="/service" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center">
                     <span className="text-blue-600 mr-2">{service.icon}</span>
                     {service.name}
                   </Link>
@@ -83,27 +106,33 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold mb-4 text-gray-900 uppercase tracking-wider border-b pb-2">Stay Connected</h3>
+            <h3 className="text-sm font-semibold mb-4 text-gray-900 uppercase tracking-wider border-b pb-2">Contact Us</h3>
             
             <div className="space-y-2">
               <div className="flex items-center text-sm text-gray-600">
-                <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
-                <a href="tel:+15551234567" className="hover:text-blue-600">+91 98402 77116</a>
+                <Phone className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600" />
+                <a href="tel:+919840277116" className="hover:text-blue-600 font-medium">+91 98402 77116</a>
               </div>
               <div className="flex items-center text-sm text-gray-600">
-                <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
-                <a href="mailto:contact@autoelite.com" className="hover:text-blue-600">drvyn.in@gmail.com</a>
+                <Mail className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600" />
+                <a href="mailto:drvyn.in@gmail.com" className="hover:text-blue-600">drvyn.in@gmail.com</a>
               </div>
+              
+              <address className="flex items-start text-sm text-gray-600 not-italic">
+                <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-blue-600" />
+                <span>
+                  Sokkamputhur Rd, Shanmuga Nagar,<br/>
+                  Selvapuram North, Coimbatore,<br/>
+                  Ponnaiah Raja Puram, Tamil Nadu 641039
+                </span>
+              </address>
+
               <div className="flex items-start text-sm text-gray-600">
-                <MapPin className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Sokkamputhur Rd, Shanmuga Nagar, Selvapuram North, Coimbatore, Ponnaiah Raja Puram, Tamil Nadu 641039</span>
-              </div>
-              <div className="flex items-start text-sm text-gray-600">
-                <Clock className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                <Clock className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0 text-blue-600" />
                 <div>
                   {workingHours.map((item) => (
                     <div key={item.day} className="flex">
-                      <span className="w-16">{item.day}:</span>
+                      <span className="w-16 font-medium">{item.day}:</span>
                       <span>{item.hours}</span>
                     </div>
                   ))}
@@ -116,7 +145,7 @@ export default function Footer() {
         <div className="pt-6 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-xs text-gray-500 mb-3 md:mb-0">
-              © {currentYear} AutoElite®. All rights reserved.
+              © {currentYear} Drvyn. All rights reserved.
             </p>
             
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
@@ -126,10 +155,7 @@ export default function Footer() {
               <Link href="#" className="text-xs text-gray-500 hover:text-blue-600 hover:underline">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-xs text-gray-500 hover:text-blue-600 hover:underline">
-                Cookie Policy
-              </Link>
-              <Link href="#" className="text-xs text-gray-500 hover:text-blue-600 hover:underline">
+              <Link href="/sitemap.xml" className="text-xs text-gray-500 hover:text-blue-600 hover:underline">
                 Sitemap
               </Link>
             </div>
@@ -139,4 +165,3 @@ export default function Footer() {
     </footer>
   );
 }
-

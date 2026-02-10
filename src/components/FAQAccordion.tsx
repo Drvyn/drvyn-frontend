@@ -19,7 +19,7 @@ const faqData: FAQItemProps[] = [
   {
     question: 'How extensive is the drvyn car service network in Coimbatore?',
     answer:
-      'drvyn has a wide network of authorized service centers across Coimbatore. You can find the nearest one to you using the service center locator on our website or mobile app.',
+      'drvyn has a wide network of authorized service centers across Coimbatore. You can find the nearest one to you using the service center locator on our website.',
   },
   {
     question: 'What is the expected turnaround time for car delivery after service?',

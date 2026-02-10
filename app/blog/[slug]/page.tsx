@@ -6,7 +6,6 @@ import SocialShareButtons from '@/components/SocialShareButtons';
 import Footer from '@/components/Footer';
 
 interface BlogPost {
-  [x: string]: any;
   id: string;
   title: string;
   content: string;
@@ -16,8 +15,10 @@ interface BlogPost {
   image: string;
   readTime: string;
   excerpt: string;
+  slug: string;
 }
 
+// Fetch individual blog post
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -39,6 +40,45 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
   }
 }
 
+// Generate SEO Metadata dynamically
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
+  
+  if (!post) {
+    return {
+      title: "Post Not Found",
+    };
+  }
+  
+  return {
+    title: `${post.title} | Drvyn Blog`,
+    description: post.excerpt || post.content.substring(0, 160) + '...',
+    openGraph: {
+      title: post.title,
+      description: post.excerpt || post.content.substring(0, 160) + '...',
+      url: `https://drvyn.in/blog/${slug}`,
+      type: 'article',
+      publishedTime: post.date,
+      authors: [post.author],
+      images: [
+        {
+          url: post.image,
+          width: 800,
+          height: 600,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: [post.image],
+    },
+  };
+}
+
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getBlogPost(slug);
@@ -47,8 +87,41 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
+  // --- STRUCTURED DATA FOR SEO (Schema.org) ---
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://drvyn.in/blog/${slug}`
+    },
+    "headline": post.title,
+    "image": [post.image],
+    "datePublished": post.date,
+    "dateModified": post.date, 
+    "author": {
+      "@type": "Person",
+      "name": post.author || "Drvyn Team"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Drvyn",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://drvyn.in/favicon2.png"
+      }
+    },
+    "description": post.excerpt
+  };
+
   return (
     <>
+      {/* Inject Schema into the page head */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+
       <Navbar/>
       <article className="min-h-screen bg-white">
         <div className="container mx-auto px-4 max-w-4xl py-8">
@@ -155,7 +228,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
               <SocialShareButtons
                 title={post.title}
-                
               />
             </div>
           </div>
@@ -240,7 +312,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             >
               View All Articles
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7-7 7m7-7H3" />
               </svg>
             </Link>
           </div>
@@ -249,32 +321,4 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <Footer/>
     </>
   );
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = await getBlogPost(slug);
-  
-  if (!post) {
-    return {
-      title: "Post Not Found",
-    };
-  }
-  
-  return {
-    title: `${post.title} | Our Blog`,
-    description: post.excerpt || post.content.substring(0, 160) + '...',
-    openGraph: {
-      title: `${post.title} | Our Blog`,
-      description: post.excerpt || post.content.substring(0, 160) + '...',
-      images: [
-        {
-          url: post.image,
-          width: 400,
-          height: 500,
-          alt: post.title,
-        },
-      ],
-    },
-  };
 }
