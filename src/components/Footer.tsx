@@ -80,7 +80,7 @@ export default function Footer() {
             <h3 className="text-sm font-semibold mb-4 text-gray-900 uppercase tracking-wider border-b pb-2">Explore</h3>
             <ul className="space-y-3">
               <li><Link href="/" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Home</Link></li>
-              <li><Link href="/service" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Services</Link></li>
+              <li><Link href="/servicespage" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Services</Link></li>
               <li><Link href="/blog" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Blog</Link></li>
               <li><Link href="/about" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>About</Link></li>
               <li><Link href="/contact" className="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center"><span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>Contact</Link></li>
