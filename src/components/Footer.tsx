@@ -106,40 +106,43 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold mb-4 text-gray-900 uppercase tracking-wider border-b pb-2">Contact Us</h3>
-            
-            <div className="space-y-2">
-              <div className="flex items-center text-sm text-gray-600">
-                <Phone className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600" />
-                <a href="tel:+919840277116" className="hover:text-blue-600 font-medium">+91 98402 77116</a>
-              </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Mail className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600" />
-                <a href="mailto:drvyn.in@gmail.com" className="hover:text-blue-600">drvyn.in@gmail.com</a>
-              </div>
-              
-              <address className="flex items-start text-sm text-gray-600 not-italic">
-                <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-blue-600" />
-                <span>
-                  Sokkamputhur Rd, Shanmuga Nagar,<br/>
-                  Selvapuram North, Coimbatore,<br/>
-                  Ponnaiah Raja Puram, Tamil Nadu 641039
-                </span>
-              </address>
+  <h3 className="text-sm font-semibold mb-4 text-gray-900 uppercase tracking-wider border-b pb-2">Contact Us</h3>
+  
+  <div className="space-y-3"> {/* Increased space between items */}
+    <div className="flex items-center text-sm text-gray-600">
+      <Phone className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600" />
+      <a href="tel:+919840277116" className="hover:text-blue-600 font-medium">+91 98402 77116</a>
+    </div>
+    
+    <div className="flex items-center text-sm text-gray-600">
+      <Mail className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600" />
+      <a href="mailto:drvyn.in@gmail.com" className="hover:text-blue-600">drvyn.in@gmail.com</a>
+    </div>
+    
+    <address className="flex items-start text-sm text-gray-600 not-italic">
+      <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-blue-600" />
+      <span>
+        Sokkamputhur Rd, Shanmuga Nagar,<br/>
+        Selvapuram North, Coimbatore,<br/>
+        Ponnaiah Raja Puram, Tamil Nadu 641039
+      </span>
+    </address>
 
-              <div className="flex items-start text-sm text-gray-600">
-                <Clock className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0 text-blue-600" />
-                <div>
-                  {workingHours.map((item) => (
-                    <div key={item.day} className="flex">
-                      <span className="w-16 font-medium">{item.day}:</span>
-                      <span>{item.hours}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+    {/* --- FIXED ALIGNMENT SECTION --- */}
+    <div className="flex items-start text-sm text-gray-600">
+      <Clock className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0 text-blue-600" />
+      <div className="flex-1"> {/* Added flex-1 to allow proper expansion */}
+        {workingHours.map((item) => (
+          <div key={item.day} className="flex mb-1 last:mb-0">
+            {/* Increased width from w-16 to w-20 to ensure labels don't overflow */}
+            <span className="w-20 font-medium shrink-0">{item.day}:</span>
+            <span className="text-gray-600">{item.hours}</span>
           </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
         </div>
 
         <div className="pt-6 border-t border-gray-200">

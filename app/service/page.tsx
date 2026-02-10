@@ -6,12 +6,6 @@ import Image from 'next/image';
 import { ChevronRight, ChevronDown, Check, Shield, Star, Circle, Trash2, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup, useTransform, useMotionValue, animate } from 'framer-motion';
 import Head from 'next/head';
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Car Repair & Detailing Services in Coimbatore | Drvyn",
-  description: "Check our car service packages. Oil change, AC repair, detailing, and general service pricing in Coimbatore. Book online now.",
-};
 
 type CarInfo = {
   brand?: string;
