@@ -1,4 +1,3 @@
-// app/login/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -14,43 +13,61 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Basic validation: 10 digits
+
     if (!/^\d{10}$/.test(phone)) {
       setError("Please enter a valid 10-digit phone number");
       return;
     }
 
-    // Save phone to session storage (simulating login)
     sessionStorage.setItem("userPhone", phone);
-    
-    // Redirect to dashboard
     router.push("/dashboard");
   };
 
   return (
     <>
       <Navbar />
-      <div className="min-h-[80vh] bg-gray-50 flex items-center justify-center px-4 py-12">
+
+      {/* Main Section */}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-gray-100"
+          transition={{ duration: 0.4 }}
+          className="
+            w-full
+            max-w-sm
+            sm:max-w-md
+            md:max-w-lg
+            bg-white
+            rounded-2xl
+            shadow-lg
+            border border-gray-100
+            p-6 sm:p-8 md:p-10
+          "
         >
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-            <p className="text-gray-500">Enter your phone number to view your bookings.</p>
+          {/* Heading */}
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Welcome Back
+            </h1>
+            <p className="text-gray-500 text-sm sm:text-base mt-2">
+              Enter your phone number to view your bookings.
+            </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-5 sm:space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Phone Number
               </label>
-              <div className="flex">
-                <span className="inline-flex items-center px-4 py-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 font-medium">
+
+              {/* Input group */}
+              <div className="flex w-full">
+                <span className="flex items-center px-3 sm:px-4 py-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm sm:text-base font-medium">
                   +91
                 </span>
+
                 <input
                   type="tel"
                   maxLength={10}
@@ -59,24 +76,51 @@ export default function LoginPage() {
                     setPhone(e.target.value.replace(/\D/g, ""));
                     setError("");
                   }}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                  className="
+                    flex-1
+                    px-3 sm:px-4
+                    py-3
+                    border border-gray-300
+                    rounded-r-lg
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-blue-500
+                    text-base sm:text-lg
+                  "
                   placeholder="Enter mobile number"
                   autoFocus
                 />
               </div>
-              {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+
+              {error && (
+                <p className="mt-2 text-xs sm:text-sm text-red-500">{error}</p>
+              )}
             </div>
 
+            {/* Button */}
             <button
               type="submit"
               disabled={phone.length !== 10}
-              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="
+                w-full
+                bg-blue-600
+                text-white
+                font-semibold
+                py-3
+                rounded-lg
+                hover:bg-blue-700
+                transition
+                disabled:opacity-70
+                disabled:cursor-not-allowed
+                text-sm sm:text-base
+              "
             >
               View Dashboard
             </button>
           </form>
         </motion.div>
       </div>
+
       <Footer />
     </>
   );
