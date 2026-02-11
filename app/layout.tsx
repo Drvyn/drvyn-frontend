@@ -81,13 +81,10 @@ export const metadata: Metadata = {
     apple: "/favicon3.png",
   },
 
-  // Google Search Console verification
   verification: {
-    
     google: "SyxIAgGg2SdZJVYbQM1-vMFSq15N5nWkLcF-r0mZFUc", 
   },
 
-  // Local geo tags - Critical for Local SEO
   other: {
     "geo.region": "IN-TN",
     "geo.placename": "Coimbatore",
@@ -101,7 +98,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Enhanced Schema for Local Business
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "AutoRepair",
@@ -160,7 +156,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Analytics - Keep this as Next Script */}
+        {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-J9GJZ6BMKP"
           strategy="afterInteractive"
@@ -171,6 +167,17 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-J9GJZ6BMKP');
+          `}
+        </Script>
+
+        {/* Microsoft Clarity Tracking */}
+        <Script id="microsoft-clarity" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "vfryqkoe0d");
           `}
         </Script>
 

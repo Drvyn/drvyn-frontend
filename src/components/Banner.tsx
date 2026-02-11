@@ -20,11 +20,6 @@ interface CarBrand {
   models: CarModel[];
 }
 
-interface FuelType {
-  type: string;
-  url: string;
-}
-
 type Direction = "forward" | "backward";
 type ViewType = "form" | "brands" | "models" | "fuels" | "years";
 
@@ -39,7 +34,6 @@ const Banner = () => {
   const [currentView, setCurrentView] = useState<ViewType>("form");
   const [brandSearch, setBrandSearch] = useState("");
   const [modelSearch, setModelSearch] = useState("");
-  const [fuelIcons, setFuelIcons] = useState<FuelType[]>([]);
   const [transitionDirection, setTransitionDirection] = useState<Direction>("forward");
   const [viewHeight, setViewHeight] = useState("auto");
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -129,27 +123,19 @@ const Banner = () => {
       setIsLoading(true);
       setError(null);
 
-      const [brandsRes, fuelsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/all-brands`).catch(() => {
-          throw new Error("Failed to fetch brands");
-        }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/fuel-icons`).catch(() => {
-          throw new Error("Failed to fetch fuel icons");
-        }),
-      ]);
+      const brandsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/car/all-brands`).catch(() => {
+        throw new Error("Failed to fetch brands");
+      });
 
       if (!brandsRes.ok) throw new Error("Brands API response not OK");
-      if (!fuelsRes.ok) throw new Error("Fuel icons API response not OK");
 
-      const [brandsData, fuelsData] = await Promise.all([brandsRes.json(), fuelsRes.json()]);
+      const brandsData = await brandsRes.json();
 
       setBrands(brandsData || []);
-      setFuelIcons(fuelsData || []);
     } catch (error) {
       console.error("Fetch error:", error);
       setError("Failed to load data. Please try again later.");
       setBrands([]);
-      setFuelIcons([]);
     } finally {
       setIsLoading(false);
     }
@@ -226,11 +212,6 @@ const Banner = () => {
       setError("Please fill all fields");
       return;
     }
-
-    // if (!otpVerified) {
-    //   setError("Please verify your phone number with OTP");
-    //   return;
-    // }
 
     try {
       sessionStorage.setItem(
@@ -423,26 +404,6 @@ const Banner = () => {
                           />
                         </div>
                         <div className="w-[30%] sm:w-auto">
-                          {/* {!otpVerified && (
-                            <button
-                              type="button"
-                              onClick={handleSendOtp}
-                              disabled={isSendingOtp || (otpSent && resendTimer > 0)}
-                              className={`w-full sm:w-[120px] text-white cursor-pointer font-semibold py-3 sm:py-4 rounded-lg transition-all duration-200 text-sm sm:text-base ${
-                                isSendingOtp || (otpSent && resendTimer > 0)
-                                  ? "bg-blue-400"
-                                  : "bg-blue-600 hover:bg-blue-700"
-                              }`}
-                            >
-                              {isSendingOtp
-                                ? "Sending..."
-                                : otpSent && resendTimer > 0
-                                ? `${resendTimer}s`
-                                : otpSent
-                                ? "Resend"
-                                : "Send OTP"}
-                            </button>
-                          )} */}
                         </div>
                       </div>
                     </motion.div>
@@ -722,23 +683,20 @@ const Banner = () => {
                         animate={{ opacity: 1 }}
                         transition={{ staggerChildren: 0.03 }}
                       >
-                        {selectedModel?.fuel_types?.map((fuel, index) => {
-                          const fuelIcon = fuelIcons.find((f) => f.type.toLowerCase() === fuel.toLowerCase());
-                          return (
-                            <motion.div
-                              key={fuel}
-                              className="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-colors duration-200 bg-white"
-                              onClick={() => handleFuelSelect(fuel)}
-                              variants={cardVariants}
-                              initial="hidden"
-                              animate="visible"
-                              custom={index}
-                            >
-                              {fuelIcon?.url && renderImage(fuelIcon.url, fuel, "mb-2")}
-                              <p className="font-medium text-center text-sm sm:text-base">{fuel}</p>
-                            </motion.div>
-                          );
-                        })}
+                        {selectedModel?.fuel_types?.map((fuel, index) => (
+                          <motion.div
+                            key={fuel}
+                            className="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-colors duration-200 bg-white"
+                            onClick={() => handleFuelSelect(fuel)}
+                            variants={cardVariants}
+                            initial="hidden"
+                            animate="visible"
+                            custom={index}
+                          >
+                            <span className="text-2xl mb-2">⛽</span>
+                            <p className="font-medium text-center text-sm sm:text-base">{fuel}</p>
+                          </motion.div>
+                        ))}
                       </motion.div>
                     )}
                   </div>
