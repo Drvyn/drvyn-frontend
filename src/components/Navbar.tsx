@@ -1,3 +1,4 @@
+// src/components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
@@ -15,24 +16,40 @@ const workSans = Work_Sans({
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // Scroll detection
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Check login status (Client-side only)
+    const checkLogin = () => {
+      const userPhone = sessionStorage.getItem("userPhone");
+      setIsLoggedIn(!!userPhone);
+    };
+
+    checkLogin();
+    
+    // Optional: Listen for storage changes if you have multiple tabs
+    window.addEventListener('storage', checkLogin);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('storage', checkLogin);
+    };
   }, []);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const navLinks = [
-    //{ name: "Home", href: "/" },
     { name: "Services", href: "/servicespage" },
     { name: "Blog", href: "/blog" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
-    { name: "Login", href: "" },
+    { name: "Login", href: "/login" }, // Default, changes dynamically below
   ];
 
   return (
@@ -61,13 +78,10 @@ const Navbar = () => {
     >
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         
-        <motion.div 
-          className="flex items-center gap-20"
-        >
+        {/* LOGO */}
+        <motion.div className="flex items-center gap-20">
           <Link href="/" className="flex items-center gap-2">
-            <motion.div
-              transition={{ type: "spring", stiffness: 400 }}
-            >
+            <motion.div transition={{ type: "spring", stiffness: 400 }}>
               <Image 
                 src="/favicon2.png"
                 alt="Drvyn Logo"
@@ -76,15 +90,14 @@ const Navbar = () => {
                 height={300} 
               />
             </motion.div>
-            <motion.span 
-              className="text-lg sm:text-xl font-bold text-black cursor-pointer"
-            >
+            <motion.span className="text-lg sm:text-xl font-bold text-black cursor-pointer">
               Drvyn
                <sup className="text-[1rem] relative -top-1 ml-0.5">™</sup>
             </motion.span>
           </Link> 
         </motion.div>
 
+        {/* DESKTOP NAV */}
         <ul className="hidden md:flex items-center gap-4 lg:gap-6">
           {navLinks.map((link) => (
             <motion.li 
@@ -94,10 +107,11 @@ const Navbar = () => {
             >
               {link.name === "Login" ? (
                 <Link
-                  href={link.href}
+                  // Dynamic href: Dashboard if logged in, Login if not
+                  href={isLoggedIn ? "/dashboard" : "/login"}
                   className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-5 py-2 text-sm rounded-full font-bold tracking-tight hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-sm hover:shadow-md"
                 >
-                  {link.name}
+                  {isLoggedIn ? "Dashboard" : "Login"}
                 </Link>
               ) : (
                 <div className="relative">
@@ -119,6 +133,7 @@ const Navbar = () => {
           ))}
         </ul>
 
+        {/* MOBILE TOGGLE */}
         <motion.div 
           className="md:hidden z-50"
           whileHover={{ scale: 1.05 }}
@@ -139,6 +154,7 @@ const Navbar = () => {
         </motion.div>
       </div>
 
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {isOpen && (
           <motion.div 
@@ -173,11 +189,11 @@ const Navbar = () => {
                   >
                     {link.name === "Login" ? (
                       <Link
-                        href={link.href}
+                        href={isLoggedIn ? "/dashboard" : "/login"}
                         onClick={() => setIsOpen(false)}
                         className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base md:text-lg px-6 md:px-8 py-3 rounded-full shadow-md transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
                       >
-                        {link.name}
+                        {isLoggedIn ? "Dashboard" : "Login"}
                       </Link>
                     ) : (
                       <Link
