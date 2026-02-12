@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Calendar, Clock, MapPin, Package, Settings, LogOut } from "lucide-react";
+import useSWR from 'swr';
 
 type Booking = {
   _id: string;
@@ -22,41 +23,39 @@ type Booking = {
   cartItems: { packageName: string; quantity: number }[];
 };
 
+// Fetcher for SWR
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function DashboardPage() {
   const router = useRouter();
   const [phone, setPhone] = useState<string | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
 
+  // 1. Get phone from session on mount
   useEffect(() => {
-    // Check if user is logged in
     const userPhone = sessionStorage.getItem("userPhone");
     if (!userPhone) {
       router.push("/login");
-      return;
+    } else {
+      setPhone(userPhone);
     }
-    setPhone(userPhone);
-
-    // Fetch bookings from backend
-    // Note: Banner.tsx saves phone as +91XXXXXXXXXX, so we encode the '+' as %2B
-    const fetchBookings = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/bookings?phone=%2B91${userPhone}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setBookings(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch bookings:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBookings();
   }, [router]);
+
+  // 2. Use SWR at the TOP LEVEL (conditionally fetching if phone exists)
+  // We encode the '+' symbol manually if needed, but usually URL params handle it. 
+  // Ideally send just the number (e.g. 919876543210) if backend supports it, 
+  // otherwise use %2B for + sign.
+  const apiUrl = phone 
+    ? `${process.env.NEXT_PUBLIC_API_URL}/api/bookings?phone=%2B91${phone}` 
+    : null;
+
+  const { data: bookings, error, isLoading } = useSWR<Booking[]>(
+    apiUrl,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000,
+    }
+  );
 
   const handleLogout = () => {
     sessionStorage.removeItem("userPhone");
@@ -73,13 +72,16 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
+  if (isLoading || !phone) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
+
+  // Ensure bookings is an array (handle API errors returning objects)
+  const bookingList = Array.isArray(bookings) ? bookings : [];
 
   return (
     <>
@@ -99,7 +101,7 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          {bookings.length === 0 ? (
+          {bookingList.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-100">
               <Settings className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-gray-800 mb-2">No Bookings Yet</h3>
@@ -113,7 +115,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="grid gap-6">
-              {bookings.map((booking, index) => (
+              {bookingList.map((booking, index) => (
                 <motion.div
                   key={booking._id}
                   initial={{ opacity: 0, y: 10 }}
