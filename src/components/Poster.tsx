@@ -13,8 +13,8 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 const posterImages = [
-  '/poster/poster1.JPG',
-  '/poster/poster2.JPG',
+  'https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985457/poster2_kqvxeh.jpg',
+  'https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985451/poster1_pdklhm.jpg',
 ];
 
 const Poster = () => {

@@ -14,49 +14,49 @@ const services = [
   {
     title: "Periodic Car Services",
     description: "Keep your car running like new with our comprehensive maintenance packages.",
-    image: "/serviceCategories/PeriodicCarServices.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985030/PeriodicCarServices_ty2czv.png",
     slug: "Periodic Car Services",
     color: "blue"
   },
   {
     title: "AC Service & Repair",
     description: "Stay cool with expert AC inspection, gas top-up, and cooling system repair.",
-    image: "/serviceCategories/ACService&Repair.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985030/ACService_Repair_dh2pnd.png",
     slug: "AC Service & Repair",
     color: "sky"
   },
   {
     title: "Denting & Painting",
     description: "Restore your car's look with high-quality paint and precision dent removal.",
-    image: "/serviceCategories/Denting&Painting.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985031/Denting_Painting_cveqm4.png",
     slug: "Denting & Painting",
     color: "red"
   },
   {
     title: "Detailing Services",
     description: "Premium interior and exterior detailing, ceramic coating, and polishing.",
-    image: "/serviceCategories/DetailingServices.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985033/DetailingServices_shyyjd.png",
     slug: "Detailing Services",
     color: "purple"
   },
   {
     title: "Car Inspections",
     description: "Comprehensive 100+ point inspection for pre-owned cars or long trips.",
-    image: "/serviceCategories/CarInspections.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985032/CarInspections_g0jxrx.png",
     slug: "Car Inspections",
     color: "green"
   },
   {
     title: "Insurance Claims",
     description: "Hassle-free insurance assistance and accidental repair support.",
-    image: "/serviceCategories/InsuranceClaims.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985034/InsuranceClaims_w5opj0.png",
     slug: "Insurance Claims",
     color: "indigo"
   },
   {
     title: "Car Wash",
     description: "Professional deep cleaning services to keep your car shining.",
-    image: "/serviceCategories/SOSService.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985030/SOSService_mrmq9o.png",
     slug: "Car Wash",
     color: "cyan"
   }

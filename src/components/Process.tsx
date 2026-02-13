@@ -4,22 +4,22 @@ import { StaggeredContainer, FadeInUp, ViewFadeInUp } from './ClientAnimations';
 export default function Process() {
   const steps = [
     {
-      icon: "/media/p1.png",
+      icon: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983470/p1_mhuw8i.png",
       title: "Your Choice",
       desc: "Explore our diverse range of services.",
     },
     {
-      icon: "/media/p2.png",
+      icon: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983476/p2_cy0qyg.png",
       title: "Book",
       desc: "Make An Appointment With Us",
     },
     {
-      icon: "/media/p3.png",
+      icon: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983470/p3_f42mhi.png",
       title: "Fair Pricing",
       desc: "Just the Right Price for the Right Service",
     },
     {
-      icon: "/media/p4.png",
+      icon: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983476/p4_upsubq.png",
       title: "At Your Doorstep",
       desc: "Convenient Doorstep Pick-Up and Drop-Off Services",
     },

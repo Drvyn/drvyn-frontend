@@ -264,7 +264,16 @@ const Banner = () => {
   if (isLoading) {
     return (
       <section className="relative flex items-center justify-center h-screen w-full bg-gradient-to-br from-gray-100 to-gray-200 font-sans">
-        <div className="absolute inset-0 z-0 blur-sm opacity-30 bg-[url('/media/bg2.png')] bg-cover bg-center" />
+        <div className="absolute inset-0 z-0 opacity-30 blur-sm">
+  <Image 
+    src="https://res.cloudinary.com/dvslpq5o2/image/upload/v1770982639/bg2_rgzkhu.png" 
+    alt="Background"
+    fill
+    priority={true} 
+    className="object-cover object-center"
+    sizes="100vw"
+  />
+</div>
         <div className="relative z-10 w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl px-8 py-12 flex flex-col items-center text-center">
           <div className="mb-6 rounded-full h-28 w-28 overflow-hidden">
             <video
@@ -298,7 +307,16 @@ const Banner = () => {
 
   return (
     <section className="relative flex flex-col lg:flex-row min-h-[400px] lg:min-h-screen w-full overflow-hidden font-sans">
-      <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: "url('/media/bg2.png')" }} />
+              <div className="absolute inset-0 z-0">
+  <Image 
+    src="https://res.cloudinary.com/dvslpq5o2/image/upload/v1770982639/bg2_rgzkhu.png" 
+    alt="Background"
+    fill
+    priority={true} 
+    className="object-cover object-center"
+    sizes="100vw"
+  />
+</div>
       <div className="relative top-0 lg:-top-7 z-20 w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="w-full max-w-md sm:max-w-lg bg-white shadow-xl p-6 sm:p-8 md:p-10 rounded-xl">
           {error && (

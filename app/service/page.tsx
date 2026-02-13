@@ -66,13 +66,13 @@ const ServicePage = () => {
   ];
 
   const serviceImages: Record<string, string> = {
-    "Periodic Car Services": "serviceCategories/PeriodicCarServices.png",
-    "AC Service & Repair": "serviceCategories/ACService&Repair.png",
-    "Denting & Painting": "serviceCategories/Denting&Painting.png",
-    "Detailing Services": "serviceCategories/DetailingServices.png",
-    "Car Inspections": "serviceCategories/CarInspections.png",
-    "Insurance Claims": "serviceCategories/InsuranceClaims.png",
-    "Car Wash": "serviceCategories/SOSService.png",
+    "Periodic Car Services": "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985030/PeriodicCarServices_ty2czv.png",
+    "AC Service & Repair": "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985030/ACService_Repair_dh2pnd.png",
+    "Denting & Painting": "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985031/Denting_Painting_cveqm4.png",
+    "Detailing Services": "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985033/DetailingServices_shyyjd.png",
+    "Car Inspections": "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985032/CarInspections_g0jxrx.png",
+    "Insurance Claims": "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985034/InsuranceClaims_w5opj0.png",
+    "Car Wash": "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770985030/SOSService_mrmq9o.png",
   };
 
   useEffect(() => {

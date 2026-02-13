@@ -4,37 +4,37 @@ import { StaggeredContainer, FadeInUp, ViewFadeInUp, ScaleIn } from './ClientAni
 
 const services = [
   {
-    image: "/media/14.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983468/14_nczhuq.png",
     title: "Auto Maintenance Services",
     description: "Complete routine maintenance including oil changes, filter replacements, brake inspections, and fluid checks to keep your vehicle running smoothly and extend its lifespan.",
     link: "/"
   },
   {
-    image: "/media/12.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983468/12_hpdx1c.png",
     title: "AC Service & Repair",
     description: "Professional AC system diagnostics, refrigerant recharge, compressor repairs, and full system restoration to keep you cool and comfortable in all seasons.",
     link: "/"
   },
   {
-    image: "/media/10.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983467/10_qas3jc.png",
     title: "Detailing Services",
     description: "Comprehensive interior and exterior detailing including deep cleaning, polishing, waxing, and protection treatments to make your car look showroom new.",
     link: "/"
   },
   {
-    image: "/media/11.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983468/11_olte26.png",
     title: "Car Inspections",
     description: "Thorough pre-purchase inspections, safety checks, and diagnostic scans to identify potential issues and ensure your vehicle is in optimal condition.",
     link: "/"
   },
   {
-    image: "/media/16.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983469/16_lo624k.png",
     title: "Insurance Claims",
     description: "Assistance with insurance claims, paperwork, and the coordination with our providers to streamline the repair process after the accidents or the damage.",
     link: "/"
   },
     {
-    image: "/media/1.png",
+    image: "https://res.cloudinary.com/dvslpq5o2/image/upload/v1770983467/1_u7cxto.png",
     title: "Denting & Painting",
     description: "Expert dent removal, scratch repair, and professional painting services to restore your vehicle's appearance and protect it from corrosion.",
     link: "/"
@@ -68,7 +68,7 @@ export default function Services() {
               liftOnHover={true}
               className="group relative flex flex-col items-center justify-center w-full max-w-sm sm:max-w-none"
             >
-              <Link href={service.link} className="block h-full w-full flex flex-col items-center">
+              <div className="block h-full w-full flex flex-col items-center">
                 <div className="h-full w-full flex flex-col rounded-xl md:rounded-2xl p-5 sm:p-6 md:p-8 border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-all duration-500 group-hover:border-blue-200 relative overflow-hidden text-center items-center justify-center">
                   <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mb-4 md:mb-6 rounded-xl md:rounded-2xl flex items-center justify-center p-3 md:p-4 transition-colors duration-500 mx-auto">
                     <Image
@@ -92,7 +92,7 @@ export default function Services() {
                     </svg>
                   </div>
                 </div>
-              </Link>
+              </div>
             </FadeInUp>
           ))}
         </StaggeredContainer>

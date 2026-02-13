@@ -25,6 +25,11 @@ const nextConfig: NextConfig = {
         port: '8000',
         pathname: '/media/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**', // This allows all images from Cloudinary
+      },
     ],
     domains: [
       'localhost',
